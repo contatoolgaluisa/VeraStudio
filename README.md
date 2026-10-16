@@ -107,6 +107,21 @@ O cadastro pela loja sempre cria uma conta de **cliente**. Para dar acesso ao pa
 
 Para remover o acesso: `npm run make-admin -w backend -- seu-email@exemplo.com --revoke`.
 
+### Configurar o envio de fotos (Supabase Storage)
+
+O painel envia as fotos dos produtos direto do navegador para o Supabase Storage, por um link de
+uso único criado pela API. Para ativar:
+
+1. No Supabase, em **Storage**, crie o bucket `product-images` marcado como **Public**, com limite
+   de **5 MB** e tipos permitidos `image/jpeg, image/png, image/webp`.
+2. Em **Project Settings > API Keys**, copie a **secret key** (`sb_secret_...`) para
+   `SUPABASE_SECRET_KEY` no `backend/.env`. Ela fica **só** no backend: nunca no frontend, no Git
+   ou em mensagens.
+3. Reinicie o backend.
+
+Sem a secret key, o painel funciona normalmente, mas o envio de fotos responde com um aviso de
+"pendente de configuração" (o backend avisa isso no log ao iniciar).
+
 ## Comandos
 
 Execute na raiz do projeto:
@@ -146,6 +161,7 @@ Comandos do banco, executados com `-w backend` (ex.: `npm run db:seed -w backend
 | `DIRECT_URL`   | Conexão usada pelas migrations (no Supabase: porta 5432)          |
 | `TEST_DATABASE_URL` | Banco exclusivo dos testes automatizados (os dados são apagados) |
 | `SUPABASE_URL` | Project URL do Supabase, usada para conferir o login (chaves públicas) |
+| `SUPABASE_SECRET_KEY` | Opcional. Secret key do Supabase, usada só para o envio de fotos |
 | `CORS_ORIGINS` | Origens autorizadas a chamar a API, separadas por vírgula         |
 | `PORT`         | Porta da API (padrão 3333)                                        |
 | `LOG_LEVEL`    | Nível de log (padrão `info`)                                      |
@@ -169,6 +185,7 @@ O servidor valida as variáveis ao iniciar e, se algo estiver errado, mostra qua
 | GET    | `/catalog/filters`            | Cores, tamanhos e faixa de preço disponíveis            |
 | GET    | `/me`                         | Perfil do usuário logado (exige login)                  |
 | PATCH  | `/me`                         | Altera o próprio nome (exige login)                     |
+| \*     | `/admin/...`                  | Painel: indicadores, produtos, variações, fotos e categorias (exige ADMIN) |
 
 Parâmetros, formatos de resposta e regras: [docs/api.md](docs/api.md).
 
@@ -191,11 +208,13 @@ Parâmetros, formatos de resposta e regras: [docs/api.md](docs/api.md).
 Documentada na Fase 8. Variáveis, URLs públicas, CORS, migrations e webhooks serão descritos em
 `docs/deploy.md`.
 
-## Limitações conhecidas (Fase 4)
+## Limitações conhecidas (Fase 5)
 
-- O painel administrativo chega na Fase 5B; o carrinho (Fase 6) e os pagamentos (Fase 7) ainda
-  não existem. Na
-  página do produto, o botão "Adicionar ao carrinho" fica desativado e diz isso.
+- O carrinho (Fase 6) e os pagamentos (Fase 7) ainda não existem. Na página do produto, o botão
+  "Adicionar ao carrinho" fica desativado e diz isso. No painel, os indicadores de pedidos e
+  receita aparecem só a partir da Fase 6.
+- No painel, a cor e o tamanho de uma variação não podem ser editados depois de criados (isso
+  mudaria o que já foi vendido com aquele SKU): desative a variação e cadastre outra.
 - As páginas de contato e políticas são conteúdo demonstrativo, identificado em cada página.
 - As fotos são ilustrativas, do Unsplash, e não mostram exatamente os produtos fictícios
   (créditos em [docs/credits.md](docs/credits.md)).

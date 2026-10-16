@@ -8,7 +8,7 @@ e **não** correspondem exatamente aos produtos fictícios da VÉRA Studio. A lo
 créditos na página `/creditos`.
 
 As imagens são carregadas diretamente dos servidores do Unsplash (com largura ajustada pela URL).
-Na Fase 5, com o painel administrativo, o envio de imagens próprias passa a usar o Supabase Storage.
+Fotos enviadas pelo painel administrativo ficam no Supabase Storage (bucket `product-images`).
 
 Onde cada crédito está no código:
 

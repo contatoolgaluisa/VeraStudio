@@ -52,7 +52,12 @@ export function ProductsPage() {
       </div>
 
       <div className="mt-8 flex flex-wrap items-end gap-4">
-        <form role="search" onSubmit={onSearch} className="flex min-w-0 flex-1 items-end gap-2">
+        <form
+          role="search"
+          aria-label="Produtos do painel"
+          onSubmit={onSearch}
+          className="flex min-w-0 flex-1 items-end gap-2"
+        >
           <div className="min-w-0 flex-1">
             <label htmlFor={searchId} className="text-sm font-medium">
               Buscar por nome ou SKU

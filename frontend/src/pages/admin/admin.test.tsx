@@ -135,7 +135,8 @@ describe('lista de produtos', () => {
     fireEvent.change(await screen.findByLabelText('Buscar por nome ou SKU'), {
       target: { value: 'vs-cam' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
+    const search = screen.getByRole('search', { name: 'Produtos do painel' });
+    fireEvent.click(within(search).getByRole('button', { name: 'Buscar' }));
 
     expect(await screen.findByText(/Nenhum produto corresponde/)).toBeTruthy();
     expect(router.state.location.search).toBe('?q=vs-cam');
