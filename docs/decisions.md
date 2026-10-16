@@ -194,3 +194,39 @@ motivo: um formulário que não envia nada seria um elemento decorativo se passa
 
 Entrega, trocas, privacidade e contato exibem um aviso de conteúdo demonstrativo. As referências
 legais (CDC art. 49 e LGPD) são reais, mas o texto não substitui a revisão de um profissional.
+
+## Fase 5A: autenticação
+
+### F5-1. Supabase cuida da identidade; a loja cuida das permissões
+
+Cadastro, senha, sessão e e-mails de recuperação ficam com o Supabase Auth. O papel de cada pessoa
+(`CUSTOMER` ou `ADMIN`) fica na tabela `user_profiles`, no **nosso** banco. O token do Supabase
+contém `user_metadata`, que o próprio usuário pode editar; por isso o backend nunca lê papel do
+token. Há testes que enviam tokens com "ADMIN" nos metadados e confirmam que nada muda.
+
+### F5-2. Verificação do login com chave pública (JWKS)
+
+O backend confere a assinatura de cada token com a chave pública publicada pelo Supabase
+(`/auth/v1/.well-known/jwks.json`), além do emissor (`iss`), do público (`aud: authenticated`) e
+da validade (`exp`). Nenhum segredo do Supabase fica no servidor para isso. Nos testes, um par de
+chaves gerado na hora faz o papel do Supabase, sem depender da internet.
+
+### F5-3. Perfil criado no primeiro acesso
+
+O perfil é criado quando a pessoa chama a API pela primeira vez já logada, sempre como `CUSTOMER`.
+Dois acessos simultâneos não duplicam o perfil (a chave primária impede, e o código trata o caso).
+
+### F5-4. Administrador definido por comando no servidor
+
+Não existe tela nem rota que conceda `ADMIN`. O comando `npm run make-admin` roda com acesso direto
+ao banco, ou seja, só quem administra o servidor consegue usá-lo.
+
+### F5-5. Esconder no frontend é conveniência, não segurança
+
+`RequireAuth` e `RequireAdmin` só evitam mostrar páginas a quem não deve vê-las. A proteção real é
+o backend, que confere login e papel em cada requisição (`requireAuth`, `requireRole`).
+
+### F5-6. Recuperação de senha sem revelar contas
+
+A tela de recuperação mostra a mesma mensagem exista ou não uma conta com o e-mail informado,
+para que ninguém a use para descobrir quem é cliente da loja.

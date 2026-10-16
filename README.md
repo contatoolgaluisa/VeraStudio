@@ -59,6 +59,7 @@ As versões exatas e o motivo de cada escolha estão em [docs/decisions.md](docs
 npm install
 
 # 2. Criar os arquivos de ambiente a partir dos exemplos
+#    e preencher os dados do Supabase (veja "Configurar o Supabase" abaixo)
 cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env
 
@@ -77,6 +78,34 @@ Abra http://localhost:5173 (status da API e do banco) ou teste a API direto, por
 http://localhost:3333/catalog/products?category=feminino.
 
 > No Windows (PowerShell), troque `cp` por `Copy-Item`.
+
+## Configurar o Supabase (autenticação)
+
+O login usa o [Supabase Auth](https://supabase.com/docs/guides/auth). O plano gratuito basta.
+
+1. Crie um projeto em https://supabase.com (região South America, São Paulo).
+2. Em **Project Settings → JWT Keys**, confira se a chave atual é assimétrica (ECC P-256 ou RSA).
+   Se for "Legacy HS256", crie uma chave assimétrica e torne-a a atual. Assim o backend confere o
+   login só com a chave **pública** (JWKS), sem guardar segredos.
+3. Em **Authentication → URL Configuration**, defina o *Site URL* `http://localhost:5173` e
+   adicione `http://localhost:5173/redefinir-senha` em *Redirect URLs*.
+4. Opcional, para desenvolvimento: em **Authentication → Sign In / Providers → Email**, desligue
+   *Confirm email* (o e-mail gratuito do Supabase tem limite baixo de envios por hora).
+5. Preencha os `.env` com a **Project URL** e a **Publishable key** (Project Settings → API Keys):
+   - `backend/.env`: `SUPABASE_URL`
+   - `frontend/.env`: `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY`
+
+A **Secret key** e a senha do banco nunca vão para o frontend nem para o Git.
+
+### Criar o primeiro administrador
+
+O cadastro pela loja sempre cria uma conta de **cliente**. Para dar acesso ao painel:
+
+1. Crie a conta normalmente em http://localhost:5173/cadastro e entre uma vez.
+2. Rode, na raiz do projeto: `npm run make-admin -w backend -- seu-email@exemplo.com`
+3. Saia e entre de novo (ou recarregue a página). O link do painel aparece em "Minha conta".
+
+Para remover o acesso: `npm run make-admin -w backend -- seu-email@exemplo.com --revoke`.
 
 ## Comandos
 
@@ -116,11 +145,13 @@ Comandos do banco, executados com `-w backend` (ex.: `npm run db:seed -w backend
 | `DATABASE_URL` | Conexão da aplicação com o banco (no Supabase: pooler, porta 6543) |
 | `DIRECT_URL`   | Conexão usada pelas migrations (no Supabase: porta 5432)          |
 | `TEST_DATABASE_URL` | Banco exclusivo dos testes automatizados (os dados são apagados) |
+| `SUPABASE_URL` | Project URL do Supabase, usada para conferir o login (chaves públicas) |
 | `CORS_ORIGINS` | Origens autorizadas a chamar a API, separadas por vírgula         |
 | `PORT`         | Porta da API (padrão 3333)                                        |
 | `LOG_LEVEL`    | Nível de log (padrão `info`)                                      |
 
-**Frontend** (`frontend/.env`): `VITE_API_URL`, o endereço da API.
+**Frontend** (`frontend/.env`): `VITE_API_URL` (endereço da API), `VITE_SUPABASE_URL` e
+`VITE_SUPABASE_PUBLISHABLE_KEY` (chave **pública** do Supabase).
 Toda variável `VITE_*` é **pública** (vai para o navegador): nunca coloque segredos nela.
 
 O servidor valida as variáveis ao iniciar e, se algo estiver errado, mostra qual variável corrigir
@@ -136,6 +167,8 @@ O servidor valida as variáveis ao iniciar e, se algo estiver errado, mostra qua
 | GET    | `/catalog/products`           | Busca, filtros, ordenação e paginação                   |
 | GET    | `/catalog/products/:slug`     | Detalhes de um produto publicado                        |
 | GET    | `/catalog/filters`            | Cores, tamanhos e faixa de preço disponíveis            |
+| GET    | `/me`                         | Perfil do usuário logado (exige login)                  |
+| PATCH  | `/me`                         | Altera o próprio nome (exige login)                     |
 
 Parâmetros, formatos de resposta e regras: [docs/api.md](docs/api.md).
 
@@ -160,7 +193,8 @@ Documentada na Fase 8. Variáveis, URLs públicas, CORS, migrations e webhooks s
 
 ## Limitações conhecidas (Fase 4)
 
-- O carrinho (Fase 6), a autenticação (Fase 5) e os pagamentos (Fase 7) ainda não existem. Na
+- O painel administrativo chega na Fase 5B; o carrinho (Fase 6) e os pagamentos (Fase 7) ainda
+  não existem. Na
   página do produto, o botão "Adicionar ao carrinho" fica desativado e diz isso.
 - As páginas de contato e políticas são conteúdo demonstrativo, identificado em cada página.
 - As fotos são ilustrativas, do Unsplash, e não mostram exatamente os produtos fictícios

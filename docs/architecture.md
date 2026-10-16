@@ -96,8 +96,8 @@ OrderStatusHistory  id · orderId · from · to · changedBy · note · createdA
 | 1    | Planejamento e arquitetura                                                               | Concluída    |
 | 2    | Fundação: monorepo, TypeScript, lint, env validado, Postgres local, health check, CI     | Concluída    |
 | 3    | Banco e produtos: schema, migrations, seed, API pública do catálogo                      | Concluída    |
-| 4    | Interface e catálogo: identidade visual, páginas públicas, responsividade, acessibilidade | 4B em revisão |
-| 5    | Autenticação e administração                                                             | Pendente     |
+| 4    | Interface e catálogo: identidade visual, páginas públicas, responsividade, acessibilidade | Concluída    |
+| 5    | Autenticação e administração                                                             | 5A em revisão |
 | 6    | Carrinho e pedidos (reserva de estoque)                                                  | Pendente     |
 | 7    | Stripe: Checkout, webhooks, idempotência                                                 | Pendente     |
 | 8    | Qualidade e implantação                                                                  | Pendente     |
