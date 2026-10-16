@@ -1,23 +1,32 @@
 @import 'tailwindcss';
 
 /*
- * Tokens de design (cores, fontes). Ao definir uma cor aqui, o Tailwind cria
- * as classes correspondentes automaticamente: --color-ink -> bg-ink, text-ink...
+ * Identidade visual da VÉRA Studio.
  *
- * PROVISÓRIO: a identidade visual completa (tipografia editorial, cor de
- * destaque final, escala de espaçamentos) será definida na fase de interface.
+ * Ao definir um token aqui, o Tailwind cria as classes correspondentes:
+ * --color-ink -> text-ink, bg-ink, border-ink...
+ *
+ * Direção: lookbook editorial. Muito espaço em branco, fotografia grande,
+ * títulos em serifada leve e todo o resto silencioso. A ousadia fica
+ * concentrada nos títulos; botões, filtros e cards são discretos.
  */
 @theme {
-  --color-paper: #f7f5f1; /* off-white de fundo */
-  --color-ink: #141414; /* texto principal */
-  --color-muted: #5c5a55; /* texto secundário (contraste AA sobre paper) */
-  --color-line: #dedad2; /* bordas e divisores */
-  --color-accent: #7a3b2c; /* destaque discreto (terracota escuro) */
-  --color-success: #2f6b3a;
-  --color-danger: #a12a2a;
+  /* Cores */
+  --color-paper: #f6f4ef; /* fundo off-white */
+  --color-paper-deep: #ebe7de; /* fundo de apoio (blocos, placeholders de imagem) */
+  --color-ink: #171615; /* texto e botões principais */
+  --color-muted: #5f5b54; /* texto secundário (contraste AA sobre paper) */
+  --color-line: #d9d4c9; /* bordas e divisores */
+  --color-accent: #7a3b2c; /* terracota escuro: promoções e detalhes */
+  --color-success: #2f5d3a;
+  --color-danger: #9b2c22;
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-serif: ui-serif, Georgia, 'Times New Roman', serif;
+  /* Tipografia */
+  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
+  --font-serif: 'Fraunces', ui-serif, Georgia, serif;
+
+  /* Animações curtas e discretas */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @layer base {
@@ -26,6 +35,23 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Os títulos usam o eixo de tamanho óptico da Fraunces: em tamanhos
+     grandes o desenho fica mais fino e contrastado, como em revista. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    font-optical-sizing: auto;
+    font-weight: 350;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
   }
 
   /* Foco sempre visível para quem navega pelo teclado */
@@ -39,7 +65,25 @@
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
+}
+
+/* Entrada do título principal da home: o único movimento automático da loja. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-rise-in {
+  animation: rise-in 900ms var(--ease-out-soft) both;
 }
