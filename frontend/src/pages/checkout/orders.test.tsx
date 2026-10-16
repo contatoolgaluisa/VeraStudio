@@ -151,7 +151,7 @@ describe('checkout', () => {
     expect(sent).toHaveLength(1);
     expect(sent[0]).toMatchObject({ items: [{ variantId: 'v-camisa', quantity: 2 }] });
     expect(String(sent[0]!.idempotencyKey)).toMatch(/^[0-9a-f-]{36}$/);
-    expect(cart.getItems()).toEqual([]);
+    await waitFor(() => expect(cart.getItems()).toEqual([]));
     expect(
       await screen.findByText('Pedido criado. As peças estão reservadas para você.'),
     ).toBeTruthy();
