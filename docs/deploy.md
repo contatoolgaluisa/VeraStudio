@@ -19,6 +19,10 @@ GitHub é publicada sozinha, na Vercel e no Render.
 - Contas: GitHub (já existe), Supabase (já existe), [Render](https://render.com) e
   [Vercel](https://vercel.com). Nas duas últimas, entre com a conta do GitHub.
 - O código a publicar precisa estar na branch `main` (PRs aprovados e mesclados).
+- A branch padrão do repositório no GitHub precisa ser a `main` (**Settings > General > Default
+  branch**). O Render e a Vercel começam pela branch padrão: se ela for outra, publicam uma versão
+  antiga. Confira também nos dois serviços que a branch configurada é a `main` (Render: campo
+  **Branch** do serviço; Vercel: **Settings > Environments > Production > Branch Tracking**).
 - A senha do banco do Supabase (definida ao criar o projeto). Se não lembrar, gere outra em
   **Project Settings > Database > Reset database password**.
 
@@ -141,6 +145,7 @@ projeto Supabase, já criado.
 | Loja fica carregando por quase 1 minuto | API do Render acordando (plano gratuito). Normal na primeira visita. |
 | Link do e-mail de confirmação abre `localhost` | **Site URL** do Supabase ainda é `localhost` (passo 6). |
 | Envio de foto responde "pendente de configuração" | `SUPABASE_SECRET_KEY` não definida no Render. |
+| Site publicado mostra uma versão antiga ("Em construção") ou o Render diz `render.yaml not found` | Serviço apontando para outra branch. Veja "Antes de começar": branch padrão do GitHub e branch configurada em cada serviço devem ser a `main`. Depois, publique de novo. |
 | Build da Vercel falha ao instalar dependências | Em **Settings > Build and Deployment**, defina Install Command como `cd .. && npm ci`. |
 | Tudo parou de responder após dias sem uso | Projeto do Supabase pausado: **Resume project**. |
 
