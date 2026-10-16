@@ -3,7 +3,11 @@ import { SLUG_PATTERN } from '../../lib/slug.js';
 
 /** Validação de tudo que o painel envia. Valores em centavos. */
 
-const slug = z.string().trim().max(100).regex(SLUG_PATTERN, 'Use só letras minúsculas, números e hífens');
+const slug = z
+  .string()
+  .trim()
+  .max(100)
+  .regex(SLUG_PATTERN, 'Use só letras minúsculas, números e hífens');
 const priceCents = z.number().int('Use centavos (número inteiro)').min(1).max(10_000_000);
 const hex = z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Cor no formato #RRGGBB');
 const uuid = z.uuid('Identificador inválido');

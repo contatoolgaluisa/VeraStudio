@@ -3,13 +3,7 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { ProductStatus, Role } from '../src/generated/prisma/client.js';
 import { createUnconfiguredImageStorage } from '../src/integrations/image-storage.js';
 import { signToken } from './auth-helpers.js';
-import {
-  buildTestApp,
-  fakeStorage,
-  resetCatalog,
-  resetUsers,
-  testPrisma,
-} from './helpers.js';
+import { buildTestApp, fakeStorage, resetCatalog, resetUsers, testPrisma } from './helpers.js';
 
 const app = buildTestApp();
 
@@ -63,7 +57,14 @@ async function addVariant(productId: string, overrides: Record<string, unknown> 
   return request(app)
     .post(`/admin/products/${productId}/variants`)
     .set('Authorization', adminAuth)
-    .send({ color: 'Preto', colorHex: '#151515', size: 'M', sku: 'VS-T-PRE-M', stock: 4, ...overrides });
+    .send({
+      color: 'Preto',
+      colorHex: '#151515',
+      size: 'M',
+      sku: 'VS-T-PRE-M',
+      stock: 4,
+      ...overrides,
+    });
 }
 
 describe('permissões: toda rota /admin exige ADMIN', () => {
@@ -88,9 +89,9 @@ describe('permissões: toda rota /admin exige ADMIN', () => {
 
   it.each(routes)('%s %s: 401 sem login e 403 para cliente', async (method, path) => {
     const call = (auth?: string) => {
-      const req = (request(app) as unknown as Record<string, (p: string) => request.Test>)[
-        method
-      ]!(path);
+      const req = (request(app) as unknown as Record<string, (p: string) => request.Test>)[method]!(
+        path,
+      );
       return auth ? req.set('Authorization', auth) : req;
     };
 
@@ -112,12 +113,48 @@ describe('dashboard', () => {
     await testPrisma.product.create({ data: { ...productInput(), slug: 'rascunho' } });
     await testPrisma.productVariant.createMany({
       data: [
-        { productId: published.id, sku: 'A-1', color: 'Preto', colorHex: '#000000', size: 'P', stock: 0 },
-        { productId: published.id, sku: 'A-2', color: 'Preto', colorHex: '#000000', size: 'M', stock: 3 },
-        { productId: published.id, sku: 'A-3', color: 'Preto', colorHex: '#000000', size: 'G', stock: 9 },
+        {
+          productId: published.id,
+          sku: 'A-1',
+          color: 'Preto',
+          colorHex: '#000000',
+          size: 'P',
+          stock: 0,
+        },
+        {
+          productId: published.id,
+          sku: 'A-2',
+          color: 'Preto',
+          colorHex: '#000000',
+          size: 'M',
+          stock: 3,
+        },
+        {
+          productId: published.id,
+          sku: 'A-3',
+          color: 'Preto',
+          colorHex: '#000000',
+          size: 'G',
+          stock: 9,
+        },
         // Não contam: variação inativa e produto arquivado
-        { productId: published.id, sku: 'A-4', color: 'Azul', colorHex: '#0000FF', size: 'P', stock: 0, isActive: false },
-        { productId: archived.id, sku: 'B-1', color: 'Preto', colorHex: '#000000', size: 'P', stock: 1 },
+        {
+          productId: published.id,
+          sku: 'A-4',
+          color: 'Azul',
+          colorHex: '#0000FF',
+          size: 'P',
+          stock: 0,
+          isActive: false,
+        },
+        {
+          productId: archived.id,
+          sku: 'B-1',
+          color: 'Preto',
+          colorHex: '#000000',
+          size: 'P',
+          stock: 1,
+        },
       ],
     });
 
@@ -159,7 +196,11 @@ describe('produtos', () => {
     const badCategory = await request(app)
       .post('/admin/products')
       .set('Authorization', adminAuth)
-      .send({ ...productInput(), slug: 'outro', categoryId: '0192f1a0-0000-7000-8000-0000000000ee' });
+      .send({
+        ...productInput(),
+        slug: 'outro',
+        categoryId: '0192f1a0-0000-7000-8000-0000000000ee',
+      });
     expect(badCategory.status).toBe(422);
 
     const badPrice = await request(app)
@@ -215,8 +256,12 @@ describe('produtos', () => {
     await addVariant(product.id);
     await createProduct({ name: 'Calça Teste Larga', slug: 'calca-teste-larga' });
 
-    const byName = await request(app).get('/admin/products?q=calça').set('Authorization', adminAuth);
-    const bySku = await request(app).get('/admin/products?q=vs-t-pre').set('Authorization', adminAuth);
+    const byName = await request(app)
+      .get('/admin/products?q=calça')
+      .set('Authorization', adminAuth);
+    const bySku = await request(app)
+      .get('/admin/products?q=vs-t-pre')
+      .set('Authorization', adminAuth);
 
     expect(byName.body.data.map((p: { slug: string }) => p.slug)).toEqual(['calca-teste-larga']);
     expect(bySku.body.data).toHaveLength(1);

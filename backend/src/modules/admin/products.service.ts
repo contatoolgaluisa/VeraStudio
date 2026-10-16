@@ -160,7 +160,11 @@ export function createAdminProductsService(prisma: PrismaClient) {
           ? input.compareAtPriceCents
           : current.compareAtPriceCents;
       if (compareAt !== null && compareAt <= price) {
-        throw new AppError(422, 'INVALID_PRICE', 'O preço "de" precisa ser maior que o preço de venda.');
+        throw new AppError(
+          422,
+          'INVALID_PRICE',
+          'O preço "de" precisa ser maior que o preço de venda.',
+        );
       }
 
       if (input.status === ProductStatus.PUBLISHED) await assertCanPublish(id);
@@ -227,7 +231,10 @@ export function createAdminProductsService(prisma: PrismaClient) {
         if (fields.isActive === false) {
           const product = await tx.product.findUniqueOrThrow({
             where: { id: variant.productId },
-            select: { status: true, _count: { select: { variants: { where: { isActive: true } } } } },
+            select: {
+              status: true,
+              _count: { select: { variants: { where: { isActive: true } } } },
+            },
           });
           if (product.status === ProductStatus.PUBLISHED && product._count.variants === 0) {
             throw new AppError(

@@ -47,7 +47,11 @@ export function createDashboardService(prisma: PrismaClient) {
 
       return {
         products: { total: draft + published + archived, published, draft, archived },
-        stock: { threshold: LOW_STOCK_THRESHOLD, lowStock: lowStockCount, outOfStock: outOfStockCount },
+        stock: {
+          threshold: LOW_STOCK_THRESHOLD,
+          lowStock: lowStockCount,
+          outOfStock: outOfStockCount,
+        },
         lowStockItems,
         // Fase 6: pedidos recebidos, pendentes e receita de pedidos pagos.
         orders: null,
