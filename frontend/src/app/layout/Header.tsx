@@ -4,6 +4,7 @@ import { Drawer } from '@/components/ui/Drawer';
 import { Icon } from '@/components/ui/Icon';
 import { brand } from '@/config/brand';
 import { mainNavigation } from '@/config/navigation';
+import { useAuth } from '@/features/auth/auth-context';
 import { cn } from '@/lib/cn';
 import { SearchForm } from './SearchForm';
 
@@ -15,6 +16,7 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { session } = useAuth();
   const closeMenu = () => setMenuOpen(false);
 
   return (
@@ -51,6 +53,10 @@ export function Header() {
           <Link to="/busca" className="p-2 md:hidden">
             <Icon name="search" />
             <span className="sr-only">Buscar</span>
+          </Link>
+          <Link to={session ? '/conta' : '/entrar'} className="p-2">
+            <Icon name="user" />
+            <span className="sr-only">{session ? 'Minha conta' : 'Entrar'}</span>
           </Link>
           {/* O carrinho é implementado na Fase 6; o link leva a uma página que avisa isso. */}
           <Link to="/carrinho" className="-mr-2 p-2">

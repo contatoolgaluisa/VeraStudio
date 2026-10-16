@@ -1,4 +1,11 @@
 import type { RouteObject } from 'react-router';
+import { RequireAdmin, RequireAuth } from '@/features/auth/guards';
+import { AccountPage } from '@/pages/account/AccountPage';
+import { AdminPage } from '@/pages/admin/AdminPage';
+import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage';
+import { LoginPage } from '@/pages/auth/LoginPage';
+import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage';
+import { SignUpPage } from '@/pages/auth/SignUpPage';
 import { CatalogPage } from '@/pages/catalog/CatalogPage';
 import { CreditsPage } from '@/pages/credits/CreditsPage';
 import { ContactPage, PrivacyPage, ReturnsPage, ShippingPage } from '@/pages/info/pages';
@@ -28,6 +35,28 @@ export const routes: RouteObject[] = [
             title="Carrinho"
             description="O carrinho de compras será implementado na Fase 6 do projeto. Por enquanto, você pode navegar pelo catálogo."
           />
+        ),
+      },
+      { path: 'entrar', element: <LoginPage /> },
+      { path: 'cadastro', element: <SignUpPage /> },
+      { path: 'recuperar-senha', element: <ForgotPasswordPage /> },
+      { path: 'redefinir-senha', element: <ResetPasswordPage /> },
+      {
+        path: 'conta',
+        element: (
+          <RequireAuth>
+            <AccountPage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: 'admin',
+        element: (
+          <RequireAuth>
+            <RequireAdmin>
+              <AdminPage />
+            </RequireAdmin>
+          </RequireAuth>
         ),
       },
       { path: 'contato', element: <ContactPage /> },

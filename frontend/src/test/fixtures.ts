@@ -83,14 +83,14 @@ export const filterOptions: FilterOptions = {
   priceRange: { minCents: 8900, maxCents: 45900 },
 };
 
-type Handler = (url: URL) => unknown;
+type Handler = (url: URL, init: RequestInit | undefined) => unknown;
 
 /**
  * Substitui o fetch global por respostas falsas, escolhidas pelo caminho da URL.
  * Retorna o mock para conferir quais URLs foram chamadas.
  */
 export function mockApi(handlers: Record<string, Handler>) {
-  const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+  const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = new URL(String(input));
     const handler = handlers[url.pathname];
     if (!handler) {
@@ -99,7 +99,9 @@ export function mockApi(handlers: Record<string, Handler>) {
         { status: 404 },
       );
     }
-    return Response.json(handler(url));
+    const result = handler(url, init);
+    // Um handler pode devolver uma Response pronta (para simular erros HTTP).
+    return result instanceof Response ? result : Response.json(result);
   });
   vi.stubGlobal('fetch', fetchMock);
   return fetchMock;

@@ -10,8 +10,8 @@
 // Regras que o Prisma não expressa (CHECK constraints e Row Level Security)
 // ficam no SQL da migration, em prisma/migrations.
 //
-// Fase 3: catálogo. Usuários, pedidos e pagamentos entram nas fases 5 a 7,
-// cada um com a sua migration.
+// Fase 3: catálogo. Fase 5: perfis de usuário. Pedidos e pagamentos entram
+// nas fases 6 e 7, cada um com a sua migration.
 
 generator client {
   provider            = "prisma-client"
@@ -116,4 +116,26 @@ model ProductVariant {
   @@index([color])
   @@index([size])
   @@map("product_variants")
+}
+
+/// Papel do usuário na loja. O cadastro público sempre cria CUSTOMER;
+/// ADMIN só é concedido pelo script `npm run make-admin` (no servidor).
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+/// Dados da loja sobre cada usuário. A identidade (e-mail, senha, sessão)
+/// fica no Supabase Auth; o `id` aqui é o mesmo id do usuário de lá.
+/// O papel fica AQUI, e não no token, para que o próprio usuário não
+/// consiga alterá-lo.
+model UserProfile {
+  id        String   @id @db.Uuid
+  email     String   @unique
+  name      String?
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("user_profiles")
 }

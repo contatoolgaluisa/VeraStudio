@@ -25,6 +25,9 @@ const envSchema = z.object({
         .filter(Boolean),
     )
     .pipe(z.array(z.url({ protocol: /^https?$/, error: 'Origem de CORS inválida' })).min(1)),
+  SUPABASE_URL: z
+    .url({ protocol: /^https?$/, error: 'SUPABASE_URL deve ser a Project URL do Supabase' })
+    .transform((url) => url.replace(/\/+$/, '')),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -36,6 +39,7 @@ export interface AppConfig {
   logLevel: Env['LOG_LEVEL'];
   databaseUrl: string;
   corsOrigins: string[];
+  supabaseUrl: string;
 }
 
 export class EnvValidationError extends Error {
@@ -65,5 +69,6 @@ export function parseEnv(source: Record<string, string | undefined>): AppConfig 
     logLevel: env.LOG_LEVEL,
     databaseUrl: env.DATABASE_URL,
     corsOrigins: env.CORS_ORIGINS,
+    supabaseUrl: env.SUPABASE_URL,
   };
 }

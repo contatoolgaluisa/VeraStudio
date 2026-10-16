@@ -2,6 +2,7 @@ import { createApp } from './app.js';
 import { type AppConfig, EnvValidationError, parseEnv } from './config/env.js';
 import { createLogger } from './lib/logger.js';
 import { createPrismaClient } from './lib/prisma.js';
+import { createSupabaseTokenVerifier } from './modules/auth/token-verifier.js';
 
 // Em desenvolvimento, lê backend/.env com o carregador nativo do Node.
 // Em produção (Render) não há arquivo: as variáveis vêm do painel.
@@ -33,6 +34,7 @@ const app = createApp({
   checkDatabase: async () => {
     await prisma.$queryRaw`SELECT 1`;
   },
+  verifyToken: createSupabaseTokenVerifier(config.supabaseUrl),
 });
 
 const server = app.listen(config.port, () => {
