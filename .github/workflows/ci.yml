@@ -35,9 +35,9 @@ jobs:
       VITE_API_URL: http://localhost:3333
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -75,7 +75,14 @@ jobs:
           npm run db:deploy
           npm run db:seed
 
-      # Se a formatação falhar, mostra no log exatamente o que o Prettier mudaria.
+      # Se a formatação falhar, anota cada arquivo no PR com o que o Prettier mudaria.
       - name: Formatação
         if: ${{ !cancelled() }}
-        run: npm run format:check || (npx prettier --write . > /dev/null && git --no-pager diff && exit 1)
+        run: |
+          if npm run format:check; then exit 0; fi
+          npx prettier --write . > /dev/null
+          for file in $(git diff --name-only); do
+            diff=$(git --no-pager diff --unified=1 -- "$file" | tail -n +5 | sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g')
+            echo "::error file=$file,title=Formatação (rode npm run format)::$diff"
+          done
+          exit 1

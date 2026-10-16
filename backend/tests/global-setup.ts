@@ -32,6 +32,7 @@ export default function setup() {
     const output = (error as { stderr?: Buffer; stdout?: Buffer }).stderr?.toString() ?? '';
     throw new Error(
       `Não foi possível preparar o banco de testes. O PostgreSQL está rodando? (npm run db:up)\n${output}`,
+      { cause: error },
     );
   }
 }
