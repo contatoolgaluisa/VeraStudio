@@ -1,0 +1,45 @@
+@import 'tailwindcss';
+
+/*
+ * Tokens de design (cores, fontes). Ao definir uma cor aqui, o Tailwind cria
+ * as classes correspondentes automaticamente: --color-ink -> bg-ink, text-ink...
+ *
+ * PROVISÓRIO: a identidade visual completa (tipografia editorial, cor de
+ * destaque final, escala de espaçamentos) será definida na fase de interface.
+ */
+@theme {
+  --color-paper: #f7f5f1; /* off-white de fundo */
+  --color-ink: #141414; /* texto principal */
+  --color-muted: #5c5a55; /* texto secundário (contraste AA sobre paper) */
+  --color-line: #dedad2; /* bordas e divisores */
+  --color-accent: #7a3b2c; /* destaque discreto (terracota escuro) */
+  --color-success: #2f6b3a;
+  --color-danger: #a12a2a;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: ui-serif, Georgia, 'Times New Roman', serif;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Foco sempre visível para quem navega pelo teclado */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

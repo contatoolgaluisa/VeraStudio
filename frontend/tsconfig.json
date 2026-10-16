@@ -1,0 +1,6 @@
+{
+  // "Solution" do TypeScript: o código do app (navegador) e os arquivos de
+  // configuração (Node) têm ambientes diferentes, então cada um tem seu tsconfig.
+  "files": [],
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
+}
