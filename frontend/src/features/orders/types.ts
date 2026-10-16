@@ -1,13 +1,7 @@
 /** Formatos da API de pedidos (ver docs/api.md). Valores em centavos. */
 
 export type OrderStatus =
-  | 'PENDING_PAYMENT'
-  | 'PAID'
-  | 'PROCESSING'
-  | 'SHIPPED'
-  | 'DELIVERED'
-  | 'CANCELLED'
-  | 'EXPIRED';
+  'PENDING_PAYMENT' | 'PAID' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'EXPIRED';
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   PENDING_PAYMENT: 'Aguardando pagamento',
