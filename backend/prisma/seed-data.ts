@@ -307,7 +307,8 @@ export const products: SeedProduct[] = [
     name: 'Carteira Couro Slim',
     slug: 'carteira-couro-slim',
     category: 'acessorios',
-    description: 'Carteira fina de couro com seis compartimentos para cartões e divisória para notas.',
+    description:
+      'Carteira fina de couro com seis compartimentos para cartões e divisória para notas.',
     priceCents: 11900,
     colors: [c.preto, c.caramelo],
     sizes: unico,

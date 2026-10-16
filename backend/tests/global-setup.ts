@@ -18,9 +18,7 @@ export default function setup() {
     );
   }
   if (url === process.env.DATABASE_URL) {
-    throw new Error(
-      'TEST_DATABASE_URL não pode ser igual a DATABASE_URL: os testes apagam dados.',
-    );
+    throw new Error('TEST_DATABASE_URL não pode ser igual a DATABASE_URL: os testes apagam dados.');
   }
 
   try {
