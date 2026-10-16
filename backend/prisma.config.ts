@@ -2,12 +2,15 @@
 // A partir da versão 7, a URL do banco fica aqui, e não mais no schema.prisma.
 import { defineConfig, env } from 'prisma/config';
 
-// O Prisma 7 não lê o .env sozinho. Usamos o carregador nativo do Node
-// e ignoramos a ausência do arquivo (no Render as variáveis vêm do painel).
-try {
-  process.loadEnvFile();
-} catch {
-  // sem .env: segue com as variáveis do ambiente
+// O Prisma 7 não lê o .env sozinho. Usamos o carregador nativo do Node.
+// Se DIRECT_URL já veio do ambiente (Render, CI ou os testes, que apontam
+// para o banco de testes), o .env não é lido, para não sobrescrever nada.
+if (!process.env.DIRECT_URL) {
+  try {
+    process.loadEnvFile();
+  } catch {
+    // sem .env: segue com as variáveis do ambiente
+  }
 }
 
 export default defineConfig({
