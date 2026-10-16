@@ -11,7 +11,7 @@
  */
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient, ProductStatus } from '../src/generated/prisma/client.js';
-import { categories, products, skuFor, stockFor } from './seed-data.js';
+import { categories, products, skuFor, stockFor, unsplashUrl } from './seed-data.js';
 
 try {
   process.loadEnvFile();
@@ -81,6 +81,9 @@ async function main() {
             isNew: product.isNew ?? false,
             status: ProductStatus.PUBLISHED,
             createdAt: new Date(now - productIndex * HOUR),
+            images: {
+              create: [{ url: unsplashUrl(product.photo.id), alt: product.photo.alt, position: 0 }],
+            },
             variants: {
               create: product.colors.flatMap((color, colorIndex) =>
                 product.sizes.map((size, sizeIndex) => ({

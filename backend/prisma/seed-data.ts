@@ -29,6 +29,8 @@ export interface SeedProduct {
   isNew?: boolean;
   colors: SeedColor[];
   sizes: string[];
+  /** Foto ilustrativa do Unsplash (créditos em docs/credits.md). */
+  photo: { id: string; alt: string };
 }
 
 export const categories: SeedCategory[] = [
@@ -88,6 +90,10 @@ export const products: SeedProduct[] = [
     isNew: true,
     colors: [c.areia, c.preto],
     sizes: roupa,
+    photo: {
+      id: 'photo-1747396206869-75ea57b325ce',
+      alt: 'Mulher posando com um vestido simples de linho',
+    },
   },
   {
     name: 'Camisa Oversized Popeline',
@@ -99,6 +105,10 @@ export const products: SeedProduct[] = [
     compareAtPriceCents: 28900,
     colors: [c.branco, c.azulCeu],
     sizes: roupaCurta,
+    photo: {
+      id: 'photo-1776633734208-3cdf89a7fbf0',
+      alt: 'Mulher de camisa branca com os braços cruzados ao ar livre',
+    },
   },
   {
     name: 'Calça Pantalona Alfaiataria',
@@ -109,6 +119,10 @@ export const products: SeedProduct[] = [
     priceCents: 35900,
     colors: [c.preto, c.offWhite],
     sizes: roupa,
+    photo: {
+      id: 'photo-1762331224129-783a3ea1fc3f',
+      alt: 'Mulher vestida de preto em frente a um prédio moderno',
+    },
   },
   {
     name: 'Blusa Tricô Canelado',
@@ -120,6 +134,7 @@ export const products: SeedProduct[] = [
     isNew: true,
     colors: [c.caramelo, c.cinza],
     sizes: roupaCurta,
+    photo: { id: 'photo-1588271968087-4c51abe05afc', alt: 'Mulher usando suéter de tricô branco' },
   },
   {
     name: 'Saia Midi Plissada',
@@ -131,6 +146,10 @@ export const products: SeedProduct[] = [
     compareAtPriceCents: 34900,
     colors: [c.oliva, c.preto],
     sizes: roupaCurta,
+    photo: {
+      id: 'photo-1789110853398-539d78dd63bc',
+      alt: 'Mulher de camiseta branca e saia preta contra fundo branco',
+    },
   },
   {
     name: 'Camiseta Essential Feminina',
@@ -141,6 +160,7 @@ export const products: SeedProduct[] = [
     priceCents: 12900,
     colors: [c.preto, c.branco],
     sizes: roupa,
+    photo: { id: 'photo-1667544417110-403b89341112', alt: 'Pessoa usando camiseta branca' },
   },
   {
     name: 'Blazer Alongado',
@@ -152,6 +172,10 @@ export const products: SeedProduct[] = [
     isNew: true,
     colors: [c.preto, c.grafite],
     sizes: roupaCurta,
+    photo: {
+      id: 'photo-1762341125028-47886b038f35',
+      alt: 'Mulher de blazer preto tocando o cabelo',
+    },
   },
   {
     name: 'Regata Seda Lavada',
@@ -163,6 +187,10 @@ export const products: SeedProduct[] = [
     compareAtPriceCents: 22900,
     colors: [c.offWhite, c.terracota],
     sizes: roupaCurta,
+    photo: {
+      id: 'photo-1788961138963-2874477b72cd',
+      alt: 'Mulher de cabelo ruivo usando regata azul-clara',
+    },
   },
 
   // --------------------------------------------------------------- Masculino
@@ -175,6 +203,7 @@ export const products: SeedProduct[] = [
     priceCents: 12900,
     colors: [c.preto, c.branco],
     sizes: roupa,
+    photo: { id: 'photo-1581655353564-df123a1eb820', alt: 'Camiseta branca de gola careca' },
   },
   {
     name: 'Camisa Linho Manga Longa',
@@ -186,6 +215,10 @@ export const products: SeedProduct[] = [
     isNew: true,
     colors: [c.areia, c.marinho],
     sizes: roupa,
+    photo: {
+      id: 'photo-1740711152088-88a009e877bb',
+      alt: 'Camisa azul pendurada em uma parede branca',
+    },
   },
   {
     name: 'Calça Chino Slim',
@@ -197,6 +230,10 @@ export const products: SeedProduct[] = [
     compareAtPriceCents: 34900,
     colors: [c.caqui, c.marinho],
     sizes: numeracao,
+    photo: {
+      id: 'photo-1473966968600-fa801b869a1a',
+      alt: 'Homem de calça marrom ajustada e tênis na rua',
+    },
   },
   {
     name: 'Polo Piquet',
@@ -207,6 +244,7 @@ export const products: SeedProduct[] = [
     priceCents: 17900,
     colors: [c.branco, c.oliva],
     sizes: roupa,
+    photo: { id: 'photo-1537261131936-3cdff36a1ac9', alt: 'Homem de camisa polo branca' },
   },
   {
     name: 'Jaqueta Overshirt Sarja',
@@ -218,6 +256,7 @@ export const products: SeedProduct[] = [
     isNew: true,
     colors: [c.oliva, c.preto],
     sizes: roupa,
+    photo: { id: 'photo-1740710748146-a15d840d6f40', alt: 'Duas jaquetas penduradas em um varal' },
   },
   {
     name: 'Bermuda Alfaiataria',
@@ -229,6 +268,7 @@ export const products: SeedProduct[] = [
     compareAtPriceCents: 29900,
     colors: [c.areia, c.preto],
     sizes: numeracao,
+    photo: { id: 'photo-1788500304851-698886835fe8', alt: 'Homem encostado em uma parede branca' },
   },
   {
     name: 'Suéter Gola Careca Merino',
@@ -239,6 +279,10 @@ export const products: SeedProduct[] = [
     priceCents: 38900,
     colors: [c.cinza, c.marinho],
     sizes: roupaCurta,
+    photo: {
+      id: 'photo-1599032909736-0155c1d43a6c',
+      alt: 'Homem de suéter cinza perto de árvores',
+    },
   },
   {
     name: 'Camiseta Henley',
@@ -249,6 +293,7 @@ export const products: SeedProduct[] = [
     priceCents: 15900,
     colors: [c.offWhite, c.grafite],
     sizes: roupa,
+    photo: { id: 'photo-1506634572416-48cdfe530110', alt: 'Homem em pé, retrato ao ar livre' },
   },
 
   // -------------------------------------------------------------- Acessórios
@@ -262,6 +307,10 @@ export const products: SeedProduct[] = [
     isNew: true,
     colors: [c.caramelo, c.preto],
     sizes: unico,
+    photo: {
+      id: 'photo-1624687943971-e86af76d57de',
+      alt: 'Bolsa de couro marrom sobre uma mesa branca',
+    },
   },
   {
     name: 'Cinto Couro Fivela Fosca',
@@ -271,6 +320,10 @@ export const products: SeedProduct[] = [
     priceCents: 14900,
     colors: [c.preto, c.caramelo],
     sizes: roupaCurta,
+    photo: {
+      id: 'photo-1624222247344-550fb60583dc',
+      alt: 'Cinto de couro marrom com fivela prateada',
+    },
   },
   {
     name: 'Lenço Seda Estampado',
@@ -282,6 +335,7 @@ export const products: SeedProduct[] = [
     compareAtPriceCents: 15900,
     colors: [c.terracota, c.azulCeu],
     sizes: unico,
+    photo: { id: 'photo-1777795530497-205664bbd965', alt: 'Busto branco com um lenço colorido' },
   },
   {
     name: 'Boné Sarja Lavada',
@@ -291,6 +345,7 @@ export const products: SeedProduct[] = [
     priceCents: 8900,
     colors: [c.preto, c.areia],
     sizes: unico,
+    photo: { id: 'photo-1521369909029-2afed882baee', alt: 'Boné cinza sobre superfície branca' },
   },
   {
     name: 'Óculos de Sol Acetato',
@@ -302,6 +357,10 @@ export const products: SeedProduct[] = [
     isNew: true,
     colors: [c.preto, c.tartaruga],
     sizes: unico,
+    photo: {
+      id: 'photo-1584036553516-bf83210aa16c',
+      alt: 'Óculos de sol de armação preta sobre superfície branca',
+    },
   },
   {
     name: 'Carteira Couro Slim',
@@ -312,6 +371,7 @@ export const products: SeedProduct[] = [
     priceCents: 11900,
     colors: [c.preto, c.caramelo],
     sizes: unico,
+    photo: { id: 'photo-1579014134953-1580d7f123f3', alt: 'Carteira de couro preta' },
   },
   {
     name: 'Brincos Argola Dourada',
@@ -322,6 +382,10 @@ export const products: SeedProduct[] = [
     compareAtPriceCents: 12900,
     colors: [c.dourado],
     sizes: unico,
+    photo: {
+      id: 'photo-1617038220319-276d3cfab638',
+      alt: 'Brincos de argola dourados sobre pedras brancas',
+    },
   },
   {
     name: 'Mochila Nylon Urbana',
@@ -332,8 +396,14 @@ export const products: SeedProduct[] = [
     priceCents: 27900,
     colors: [c.preto, c.grafite],
     sizes: unico,
+    photo: { id: 'photo-1591534577302-1696205bb2bc', alt: 'Mochila preta sobre tecido branco' },
   },
 ];
+
+/** URL base de uma foto do Unsplash. O frontend acrescenta largura e formato. */
+export function unsplashUrl(photoId: string): string {
+  return `https://images.unsplash.com/${photoId}`;
+}
 
 // Estoque determinístico (sempre o mesmo a cada seed), com alguns zeros para
 // demonstrar "esgotado" e alguns valores baixos para o alerta de estoque baixo.
