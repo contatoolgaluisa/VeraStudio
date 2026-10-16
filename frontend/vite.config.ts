@@ -17,6 +17,9 @@ export default defineConfig({
     environment: 'jsdom',
     include: ['src/**/*.test.{ts,tsx}'],
     setupFiles: ['./src/test/setup.ts'],
+    // Os testes de tela fazem vários passos com espera. Em máquinas mais lentas
+    // (ou com antivírus analisando cada arquivo), 5 s por teste não bastam.
+    testTimeout: 30_000,
     env: {
       VITE_API_URL: 'http://localhost:3333',
       VITE_SUPABASE_URL: 'https://projeto-teste.supabase.co',
