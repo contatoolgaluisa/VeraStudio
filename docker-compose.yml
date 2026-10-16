@@ -1,0 +1,25 @@
+# PostgreSQL local para desenvolvimento e testes (decisão D2).
+# Em produção o banco é o Postgres do Supabase; aqui ninguém toca na nuvem.
+# Credenciais abaixo são apenas para a máquina local; não use em produção.
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: vera-studio-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vera
+      POSTGRES_PASSWORD: vera_local_dev
+      POSTGRES_DB: vera_studio
+    ports:
+      - '5432:5432'
+    volumes:
+      - vera-db-data:/var/lib/postgresql/data
+      - ./backend/scripts/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U vera -d vera_studio']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  vera-db-data:

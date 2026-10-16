@@ -1,0 +1,36 @@
+# Integração contínua: roda as mesmas verificações de `npm run check`
+# a cada push e pull request. Um commit só é considerado bom se passar aqui.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      # Valores fictícios só para o CI: os testes da Fase 2 não acessam o banco.
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      DIRECT_URL: postgresql://ci:ci@localhost:5432/ci
+      CORS_ORIGINS: http://localhost:5173
+      VITE_API_URL: http://localhost:3333
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # Usa `npm ci` (reprodutível) quando o package-lock.json existir.
+      - name: Instalar dependências
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run build

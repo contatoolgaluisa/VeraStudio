@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+package-lock.json
+backend/src/generated
+backend/prisma/migrations
+playwright-report
+test-results
+# Documentação é formatada manualmente (tabelas alinhadas à mão)
+*.md
