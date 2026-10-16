@@ -3,9 +3,9 @@
 E-commerce de moda full-stack construído como **projeto de portfólio**. A loja, os produtos e os
 dados comerciais são fictícios, e nenhum pagamento real é processado (o Stripe roda em modo de teste).
 
-> **Status:** Fase 4 de 8 (interface). Home, catálogo com filtros e busca, página de produto e
-> páginas institucionais funcionam com dados reais da API; autenticação, carrinho e pagamentos
-> chegam nas próximas fases.
+> **Status:** Fase 6 de 8. Loja com catálogo, busca e filtros, página de produto, cadastro e
+> login, painel administrativo (produtos, variações, estoque, fotos e categorias) e carrinho,
+> tudo com dados reais da API. Fechamento do pedido e pagamento chegam nas próximas entregas.
 > Veja o [plano completo](docs/architecture.md#plano-de-fases).
 
 ## Tecnologias
@@ -163,6 +163,8 @@ Comandos do banco, executados com `-w backend` (ex.: `npm run db:seed -w backend
 | `SUPABASE_URL` | Project URL do Supabase, usada para conferir o login (chaves públicas) |
 | `SUPABASE_SECRET_KEY` | Opcional. Secret key do Supabase, usada só para o envio de fotos |
 | `CORS_ORIGINS` | Origens autorizadas a chamar a API, separadas por vírgula         |
+| `SHIPPING_FLAT_CENTS` | Opcional. Frete fixo em centavos (padrão 1990)              |
+| `FREE_SHIPPING_MIN_CENTS` | Opcional. Mínimo para frete grátis em centavos (padrão 29900) |
 | `PORT`         | Porta da API (padrão 3333)                                        |
 | `LOG_LEVEL`    | Nível de log (padrão `info`)                                      |
 
@@ -183,6 +185,7 @@ O servidor valida as variáveis ao iniciar e, se algo estiver errado, mostra qua
 | GET    | `/catalog/products`           | Busca, filtros, ordenação e paginação                   |
 | GET    | `/catalog/products/:slug`     | Detalhes de um produto publicado                        |
 | GET    | `/catalog/filters`            | Cores, tamanhos e faixa de preço disponíveis            |
+| POST   | `/cart/quote`                 | Confere o carrinho: preços, estoque, descontos e frete  |
 | GET    | `/me`                         | Perfil do usuário logado (exige login)                  |
 | PATCH  | `/me`                         | Altera o próprio nome (exige login)                     |
 | \*     | `/admin/...`                  | Painel: indicadores, produtos, variações, fotos e categorias (exige ADMIN) |
@@ -211,9 +214,11 @@ Passo a passo para publicar (Vercel + Render + Supabase, planos gratuitos):
 
 ## Limitações conhecidas (Fase 5)
 
-- O carrinho (Fase 6) e os pagamentos (Fase 7) ainda não existem. Na página do produto, o botão
-  "Adicionar ao carrinho" fica desativado e diz isso. No painel, os indicadores de pedidos e
-  receita aparecem só a partir da Fase 6.
+- O carrinho funciona, mas o fechamento do pedido (Fase 6B) e o pagamento (Fase 7) ainda não
+  existem: o botão "Finalizar compra" fica desativado e diz isso. No painel, os indicadores de
+  pedidos e receita aparecem só a partir da Fase 6B.
+- O frete é uma regra fixa demonstrativa (R$ 19,90, grátis a partir de R$ 299), configurável por
+  `SHIPPING_FLAT_CENTS` e `FREE_SHIPPING_MIN_CENTS`, sem cálculo por CEP.
 - No plano gratuito do Render, a API desliga após 15 minutos sem acesso; a primeira visita
   seguinte leva cerca de 1 minuto (a loja mostra um aviso).
 - No painel, a cor e o tamanho de uma variação não podem ser editados depois de criados (isso

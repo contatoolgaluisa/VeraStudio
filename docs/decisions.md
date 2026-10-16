@@ -269,3 +269,35 @@ cria-se outra. Variações não são excluídas, pelo mesmo motivo.
 O dashboard calcula tudo na hora a partir do banco. Pedidos e receita ainda não existem, então a
 API responde `orders: null` e a tela explica que esses números chegam na Fase 6. Estoque baixo é
 "3 unidades ou menos", contando só variações ativas de produtos que não estão arquivados.
+
+## Fase 6A: carrinho
+
+### F6-1. Store próprio em vez de Zustand
+
+O plano (D3) previa Zustand. Na implementação, o carrinho precisou de pouco: uma lista, quatro
+operações e salvar no navegador. O React já tem a peça certa para isso (`useSyncExternalStore`),
+e o store inteiro tem menos de 150 linhas comentadas em `frontend/src/features/cart/store.ts`.
+Assim o projeto não ganha uma dependência sem necessidade, e o funcionamento fica visível. Se o
+estado global crescer (Fase 6B em diante), trocar por Zustand é simples, porque os componentes
+só usam `useCartItems`, `useCartCount` e `cart.*`.
+
+### F6-2. O navegador guarda a escolha; o servidor decide os valores
+
+O carrinho salvo guarda variação, quantidade e uma "foto" do produto (nome, cor, imagem) só para
+exibir enquanto a API responde. O que é enviado a `POST /cart/quote` é apenas variação e
+quantidade: preço, desconto, estoque, frete e total vêm do banco. Campos extras no corpo são
+recusados. Os dados salvos são validados com Zod ao carregar; se estiverem corrompidos ou forem
+adulterados, o carrinho começa vazio.
+
+### F6-3. Ajuste automático ao estoque
+
+Se o estoque cair abaixo do que está no carrinho, a API devolve a linha como `ADJUSTED` com a
+quantidade possível, e a tela aplica essa quantidade e avisa o cliente. Itens esgotados, fora da
+loja ou inexistentes voltam como `UNAVAILABLE` e não entram no total. A API não revela o
+estoque exato: o máximo por item é o menor entre o estoque e 10.
+
+### F6-4. Frete fixo configurável (D8)
+
+R$ 19,90 para todo o Brasil, grátis quando o valor dos produtos, já com desconto, chega a
+R$ 299,00. Os dois valores vêm de variáveis de ambiente com esses padrões. O cálculo é uma função
+pura (`backend/src/modules/cart/pricing.ts`), que a Fase 6B reutiliza para o pedido.

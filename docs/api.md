@@ -128,6 +128,60 @@ Aceita `?category=<slug>` para restringir a uma categoria.
 }
 ```
 
+## Carrinho (público, sem login)
+
+### `POST /cart/quote`
+
+Confere o carrinho guardado no navegador. Recebe **só** variação e quantidade; todos os valores
+vêm do banco. Não altera nada (não reserva estoque).
+
+```json
+{ "items": [{ "variantId": "<uuid>", "quantity": 2 }] }
+```
+
+- No máximo 50 linhas e quantidade de 1 a 99 por linha. Linhas da mesma variação são somadas.
+- Campos desconhecidos (ex.: um preço enviado pelo navegador) → `400 VALIDATION_ERROR`.
+
+```json
+{
+  "data": {
+    "items": [
+      {
+        "variantId": "<uuid>",
+        "status": "OK",
+        "requestedQuantity": 2,
+        "quantity": 2,
+        "maxQuantity": 10,
+        "unitPriceCents": 15000,
+        "compareAtPriceCents": 20000,
+        "lineTotalCents": 30000,
+        "product": { "id": "...", "slug": "camisa-linho", "name": "Camisa Linho", "image": { "url": "...", "alt": "..." } },
+        "variant": { "sku": "VS-CAM-PRE-M", "color": "Preto", "colorHex": "#151515", "size": "M" }
+      }
+    ],
+    "summary": {
+      "itemCount": 2,
+      "subtotalCents": 40000,
+      "discountCents": 10000,
+      "shippingCents": 0,
+      "totalCents": 30000,
+      "freeShippingMinCents": 29900,
+      "freeShippingRemainingCents": 0
+    }
+  }
+}
+```
+
+| `status`      | Significado                                                                 |
+| ------------- | --------------------------------------------------------------------------- |
+| `OK`          | Disponível na quantidade pedida                                             |
+| `ADJUSTED`    | Disponível em quantidade menor (`quantity`), por estoque ou limite de 10    |
+| `UNAVAILABLE` | Esgotada, desativada, produto fora da loja ou inexistente (`quantity: 0`)   |
+
+`subtotalCents` usa os preços originais (o preço "de", quando há promoção), `discountCents` é o
+que as promoções descontam, e o frete é grátis quando `subtotal - desconto` atinge
+`freeShippingMinCents`. Itens indisponíveis não entram nos totais.
+
 ## Conta (exige login)
 
 Enviar o cabeçalho `Authorization: Bearer <access token do Supabase>`.

@@ -30,7 +30,8 @@
 ### Estado no frontend
 
 - **TanStack Query**: dados vindos da API (cache, carregamento, erro, nova tentativa).
-- **Zustand com `persist`** (Fase 6): carrinho salvo no navegador e revalidado no servidor.
+- **Carrinho** (Fase 6A): store próprio com `useSyncExternalStore`, salvo no `localStorage` e
+  conferido no servidor a cada mudança (`POST /cart/quote`). Ver decisão F6-1.
 
 ## Organização do backend
 
@@ -98,7 +99,7 @@ OrderStatusHistory  id · orderId · from · to · changedBy · note · createdA
 | 3    | Banco e produtos: schema, migrations, seed, API pública do catálogo                      | Concluída    |
 | 4    | Interface e catálogo: identidade visual, páginas públicas, responsividade, acessibilidade | Concluída    |
 | 5    | Autenticação e administração                                                             | 5A concluída, 5B em revisão |
-| 6    | Carrinho e pedidos (reserva de estoque)                                                  | Pendente     |
+| 6    | Carrinho e pedidos (reserva de estoque)                                                  | 6A em revisão |
 | 7    | Stripe: Checkout, webhooks, idempotência                                                 | Pendente     |
 | 8    | Qualidade e implantação                                                                  | Pendente     |
 
