@@ -7,6 +7,7 @@ import {
 import { createLogger } from './lib/logger.js';
 import { createPrismaClient } from './lib/prisma.js';
 import { createSupabaseTokenVerifier } from './modules/auth/token-verifier.js';
+import { releaseExpiredReservations } from './modules/orders/reservations.js';
 
 // Em desenvolvimento, lê backend/.env com o carregador nativo do Node.
 // Em produção (Render) não há arquivo: as variáveis vêm do painel.
@@ -51,6 +52,18 @@ if (!config.supabaseSecretKey) {
   logger.warn('SUPABASE_SECRET_KEY não definida: o envio de fotos pelo painel está desativado.');
 }
 
+// Devolve ao estoque as reservas de pedidos não pagos em 30 minutos.
+// As rotas de pedidos também fazem isso ao serem chamadas, porque no plano
+// gratuito do Render o servidor "dorme" e este relógio para junto.
+const reservationSweep = setInterval(() => {
+  releaseExpiredReservations(prisma)
+    .then((released) => {
+      if (released > 0) logger.info({ released }, 'Reservas expiradas liberadas');
+    })
+    .catch((err: unknown) => logger.error({ err }, 'Falha ao liberar reservas expiradas'));
+}, 60_000);
+reservationSweep.unref();
+
 const server = app.listen(config.port, () => {
   logger.info(`API ouvindo em http://localhost:${config.port} (${config.nodeEnv})`);
 });
@@ -59,6 +72,7 @@ const server = app.listen(config.port, () => {
 // quando o Render (ou o Ctrl+C) pede para o processo encerrar.
 function shutdown(signal: string) {
   logger.info(`${signal} recebido, encerrando...`);
+  clearInterval(reservationSweep);
   server.close(() => {
     prisma
       .$disconnect()

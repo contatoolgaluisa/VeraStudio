@@ -41,6 +41,16 @@ async function main() {
   const now = Date.now();
   const HOUR = 60 * 60 * 1000;
 
+  // Recriar o catálogo apagaria as variações que os pedidos referenciam.
+  // O banco já impediria (chave estrangeira), mas a mensagem fica mais clara aqui.
+  const orderCount = await prisma.order.count();
+  if (orderCount > 0) {
+    throw new Error(
+      `Existem ${orderCount} pedido(s) neste banco: o seed recriaria os produtos já vendidos. ` +
+        'No banco local, use "npm run db:reset -w backend" para recomeçar do zero.',
+    );
+  }
+
   await prisma.$transaction(
     async (tx) => {
       await tx.productVariant.deleteMany();

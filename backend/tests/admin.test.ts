@@ -85,6 +85,9 @@ describe('permissões: toda rota /admin exige ADMIN', () => {
     ['post', '/admin/categories'],
     ['patch', `/admin/categories/${someId}`],
     ['delete', `/admin/categories/${someId}`],
+    ['get', '/admin/orders'],
+    ['get', `/admin/orders/${someId}`],
+    ['post', `/admin/orders/${someId}/status`],
   ];
 
   it.each(routes)('%s %s: 401 sem login e 403 para cliente', async (method, path) => {
@@ -103,7 +106,7 @@ describe('permissões: toda rota /admin exige ADMIN', () => {
 });
 
 describe('dashboard', () => {
-  it('calcula os indicadores a partir do banco e não inventa pedidos', async () => {
+  it('calcula os indicadores a partir do banco', async () => {
     const published = await testPrisma.product.create({
       data: { ...productInput(), slug: 'publicado', status: ProductStatus.PUBLISHED },
     });
@@ -164,7 +167,12 @@ describe('dashboard', () => {
     expect(res.body.data.products).toEqual({ total: 3, published: 1, draft: 1, archived: 1 });
     expect(res.body.data.stock).toEqual({ threshold: 3, lowStock: 2, outOfStock: 1 });
     expect(res.body.data.lowStockItems.map((i: { sku: string }) => i.sku)).toEqual(['A-1', 'A-2']);
-    expect(res.body.data.orders).toBeNull();
+    expect(res.body.data.orders).toEqual({
+      total: 0,
+      pendingPayment: 0,
+      toFulfill: 0,
+      paidRevenueCents: 0,
+    });
   });
 });
 
