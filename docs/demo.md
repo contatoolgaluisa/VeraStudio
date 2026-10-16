@@ -29,15 +29,19 @@ com produtos, textos e fotos de demonstração. Não há clientes, vendas ou ava
    - criar um produto (nasce como rascunho), cadastrar variações e publicar;
    - ajustar o estoque (+5 / -2) e ver a mudança na loja;
    - enviar uma foto e reordenar as fotos;
-   - gerenciar categorias.
+   - gerenciar categorias;
+   - pedidos: lista com busca, detalhe, histórico de quem mudou o quê e mudança de situação
+     (separação, envio, entrega). "Pago" não existe como botão: só o pagamento confirma.
+8. **Carrinho e pedido**: adicionar peças, ver o frete e o total recalculados pelo servidor,
+   finalizar (exige login), ver o pedido "aguardando pagamento" com as peças reservadas por 30
+   minutos e cancelar em "Meus pedidos" (o estoque volta na hora).
 
 ## Em desenvolvimento
 
 Diga isso abertamente se perguntarem:
 
-- **Carrinho e pedidos** (Fase 6): o botão "Adicionar ao carrinho" está desativado e explica o
-  motivo.
-- **Pagamento com Stripe em modo de teste** (Fase 7).
+- **Pagamento com Stripe em modo de teste** (Fase 7): hoje o pedido fica aguardando pagamento e
+  expira em 30 minutos.
 - **Revisão final de qualidade e segurança** (Fase 8).
 
 ## Se for dar acesso ao painel a outra pessoa

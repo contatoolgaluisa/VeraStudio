@@ -190,6 +190,81 @@ Enviar o cabeçalho `Authorization: Bearer <access token do Supabase>`.
   (`CUSTOMER` ou `ADMIN`) vem do nosso banco, nunca do token.
 - `PATCH /me` com `{ "name": "..." }`: altera o próprio nome.
 
+## Pedidos (exige login)
+
+Todas as rotas só enxergam pedidos do usuário do token; pedido de outra pessoa responde 404.
+
+### `POST /orders`
+
+```json
+{ "items": [{ "variantId": "<uuid>", "quantity": 2 }], "idempotencyKey": "<uuid>" }
+```
+
+Confere os itens, **reserva o estoque** por 30 minutos e cria o pedido `PENDING_PAYMENT` com
+valores calculados no servidor. Responde `201` com o pedido. Repetir o envio com a mesma
+`idempotencyKey` devolve o mesmo pedido com `200` (sem reservar de novo).
+
+| Erro                              | Quando                                                            |
+| --------------------------------- | ----------------------------------------------------------------- |
+| `409 CART_CHANGED`                | Item inexistente, indisponível ou sem estoque. `details` lista cada `{ variantId, reason }` (`NOT_FOUND`, `UNAVAILABLE`, `INSUFFICIENT_STOCK`). Nada é reservado. |
+| `409 TOO_MANY_PENDING_ORDERS`     | O cliente já tem 3 pedidos aguardando pagamento                   |
+| `429 TOO_MANY_REQUESTS`           | Mais de 10 tentativas por minuto                                  |
+
+Formato do pedido:
+
+```json
+{
+  "data": {
+    "id": "<uuid>",
+    "number": 1001,
+    "status": "PENDING_PAYMENT",
+    "itemCount": 2,
+    "subtotalCents": 40000,
+    "discountCents": 10000,
+    "shippingCents": 0,
+    "totalCents": 30000,
+    "reservationExpiresAt": "2026-10-16T15:30:00.000Z",
+    "createdAt": "2026-10-16T15:00:00.000Z",
+    "items": [
+      {
+        "productName": "Camisa Linho",
+        "productSlug": "camisa-linho",
+        "sku": "VS-CAM-PRE-M",
+        "color": "Preto",
+        "size": "M",
+        "imageUrl": "...",
+        "unitPriceCents": 15000,
+        "compareAtPriceCents": 20000,
+        "quantity": 2,
+        "lineTotalCents": 30000
+      }
+    ],
+    "statusHistory": [{ "fromStatus": null, "toStatus": "PENDING_PAYMENT", "createdAt": "..." }]
+  }
+}
+```
+
+### `GET /orders` e `GET /orders/:id`
+
+Lista (paginada com `page` e `pageSize` até 50, mais recentes primeiro) e detalhe dos meus
+pedidos.
+
+### `POST /orders/:id/cancel`
+
+Cancela um pedido `PENDING_PAYMENT` e devolve o estoque. Em outra situação: `409 CANNOT_CANCEL`.
+
+### Situações
+
+| `status`          | Significado                                           | Quem muda                    |
+| ----------------- | ----------------------------------------------------- | ---------------------------- |
+| `PENDING_PAYMENT` | Criado, estoque reservado por 30 minutos              | Cliente, ao criar             |
+| `EXPIRED`         | Reserva venceu sem pagamento; estoque devolvido       | Sistema                      |
+| `CANCELLED`       | Desistência antes do pagamento; estoque devolvido     | Cliente ou administração     |
+| `PAID`            | Pagamento confirmado                                  | Só o pagamento (Fase 7)      |
+| `PROCESSING`      | Em separação                                          | Administração                |
+| `SHIPPED`         | Enviado                                               | Administração                |
+| `DELIVERED`       | Entregue                                              | Administração                |
+
 ## Painel administrativo (exige ADMIN)
 
 Todas as rotas abaixo exigem login (`401 UNAUTHENTICATED` sem token válido) e o papel `ADMIN`
@@ -213,6 +288,9 @@ Todas as rotas abaixo exigem login (`401 UNAUTHENTICATED` sem token válido) e o
 | POST   | `/admin/categories`                    | Cria (o endereço é gerado do nome)                         |
 | PATCH  | `/admin/categories/:id`                | Altera nome, descrição e ordem                             |
 | DELETE | `/admin/categories/:id`                | Exclui categoria sem produtos (204)                        |
+| GET    | `/admin/orders`                        | Pedidos com `q` (número ou e-mail), `status`, `page`       |
+| GET    | `/admin/orders/:id`                    | Detalhe, cliente e histórico com autor e observação        |
+| POST   | `/admin/orders/:id/status`             | Muda a situação (`{ "status", "note"? }`)                  |
 
 ### `GET /admin/dashboard`
 
@@ -230,12 +308,13 @@ Todas as rotas abaixo exigem login (`401 UNAUTHENTICATED` sem token válido) e o
         "product": { "id": "...", "name": "Camiseta Essential" }
       }
     ],
-    "orders": null
+    "orders": { "total": 12, "pendingPayment": 2, "toFulfill": 3, "paidRevenueCents": 0 }
   }
 }
 ```
 
-`orders` é `null` até a Fase 6 (pedidos ainda não existem).
+`orders` traz `{ total, pendingPayment, toFulfill, paidRevenueCents }`. A receita soma só
+pedidos com pagamento confirmado (a partir da Fase 7).
 
 ### Produtos
 
@@ -294,3 +373,11 @@ Sem `SUPABASE_SECRET_KEY` no backend, as rotas de envio respondem
 ### Categorias
 
 `DELETE /admin/categories/:id` responde `409 CATEGORY_IN_USE` se a categoria tiver produtos.
+
+### Pedidos no painel
+
+`POST /admin/orders/:id/status` aceita só as mudanças da tabela de situações:
+`PENDING_PAYMENT → CANCELLED` (devolve o estoque), `PAID → PROCESSING`,
+`PROCESSING → SHIPPED` e `SHIPPED → DELIVERED`. Qualquer outra, inclusive para `PAID`, responde
+`422 INVALID_TRANSITION`. Se a situação mudou enquanto o administrador editava:
+`409 STATUS_CHANGED`. Cada mudança fica no histórico com o administrador e a observação.

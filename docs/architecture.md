@@ -63,9 +63,10 @@ Erros esperados usam `AppError` (código HTTP e código de erro definidos). Qual
 
 Valores monetários em **centavos (inteiro)**, o formato usado pelo Stripe.
 
-**Implementado (Fase 3):** `Category`, `Product`, `ProductImage`, `ProductVariant`.
-**Planejado:** `UserProfile` (Fase 5), `Order`, `OrderItem` e `OrderStatusHistory` (Fase 6),
-`Payment` e `WebhookEvent` (Fase 7). Cada grupo entra com a sua migration, junto do código que o usa.
+**Implementado:** `Category`, `Product`, `ProductImage`, `ProductVariant` (Fase 3),
+`UserProfile` (Fase 5), `Order`, `OrderItem` e `OrderStatusHistory` (Fase 6).
+**Planejado:** `Payment` e `WebhookEvent` (Fase 7). Cada grupo entra com a sua migration, junto do
+código que o usa.
 
 ```
 UserProfile    id (= id do Supabase Auth) · email · name · role (CUSTOMER|ADMIN) · timestamps
@@ -99,7 +100,7 @@ OrderStatusHistory  id · orderId · from · to · changedBy · note · createdA
 | 3    | Banco e produtos: schema, migrations, seed, API pública do catálogo                      | Concluída    |
 | 4    | Interface e catálogo: identidade visual, páginas públicas, responsividade, acessibilidade | Concluída    |
 | 5    | Autenticação e administração                                                             | 5A concluída, 5B em revisão |
-| 6    | Carrinho e pedidos (reserva de estoque)                                                  | 6A em revisão |
+| 6    | Carrinho e pedidos (reserva de estoque)                                                  | 6A concluída, 6B em revisão |
 | 7    | Stripe: Checkout, webhooks, idempotência                                                 | Pendente     |
 | 8    | Qualidade e implantação                                                                  | Pendente     |
 

@@ -48,6 +48,8 @@ npm run db:seed -w backend
 ```
 
 O resultado esperado é a lista de migrations aplicadas e a mensagem do seed com 24 produtos.
+O seed recusa rodar se o banco já tiver pedidos (recriar o catálogo apagaria produtos vendidos).
+Migrations novas de fases seguintes são aplicadas sozinhas pelo Render a cada publicação.
 **Feche essa janela do terminal ao terminar**, para não rodar por engano um comando local no
 banco publicado.
 
