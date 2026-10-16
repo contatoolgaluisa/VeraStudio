@@ -73,10 +73,8 @@ function ProductView({ product }: { product: ProductDetail }) {
     setQuantity(1);
   }
 
-  const images =
-    product.images.length > 0
-      ? product.images
-      : [{ id: 'sem-foto', url: '', alt: '', color: null }];
+  const { images, matchesColor } = imagesForColor(product, color);
+  const colorHex = product.colors.find((c) => c.name === color)?.hex;
 
   return (
     <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-10 lg:pt-10">
@@ -111,6 +109,16 @@ function ProductView({ product }: { product: ProductDetail }) {
               priority={index === 0}
             />
           ))}
+          {!matchesColor && color && (
+            <p className="flex items-center gap-2 text-sm text-muted">
+              <span
+                aria-hidden="true"
+                className="size-3 rounded-full border border-black/15"
+                style={{ backgroundColor: colorHex }}
+              />
+              Foto ilustrativa. A cor escolhida é {color}.
+            </p>
+          )}
         </div>
 
         <div className="lg:sticky lg:top-24 lg:self-start">
@@ -257,6 +265,21 @@ function ProductView({ product }: { product: ProductDetail }) {
       <RelatedProducts product={product} />
     </div>
   );
+}
+
+/**
+ * Fotos a exibir: as cadastradas para a cor escolhida, quando existem.
+ * Sem fotos por cor (caso atual do seed, com uma foto ilustrativa por
+ * produto), mostra todas e avisa que a foto não corresponde à cor.
+ */
+function imagesForColor(product: ProductDetail, color: string | undefined) {
+  const ofColor = product.images.filter((image) => image.color === color);
+  if (ofColor.length > 0) return { images: ofColor, matchesColor: true };
+  if (product.images.length > 0) return { images: product.images, matchesColor: false };
+  return {
+    images: [{ id: 'sem-foto', url: '', alt: '', color: null }],
+    matchesColor: false,
+  };
 }
 
 const SIZE_STATUS_LABEL: Record<SizeStatus, string> = {

@@ -75,6 +75,42 @@ describe('página do produto', () => {
     expect(screen.getByText(/Escolha um tamanho/)).toBeTruthy();
   });
 
+  it('troca a foto quando há fotos cadastradas por cor', async () => {
+    const withPhotos = makeProductDetail({
+      images: [
+        {
+          id: 'f1',
+          url: 'https://exemplo.test/preto.jpg',
+          alt: 'Camiseta preta',
+          color: 'Preto',
+        },
+        {
+          id: 'f2',
+          url: 'https://exemplo.test/branco.jpg',
+          alt: 'Camiseta branca',
+          color: 'Branco',
+        },
+      ],
+    });
+    mockApi({ ...handlers, '/catalog/products/camiseta-teste': () => ({ data: withPhotos }) });
+    renderRoute('/produto/camiseta-teste?cor=Preto');
+
+    expect(await screen.findByRole('img', { name: 'Camiseta preta' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('radio', { name: 'Branco' }));
+    expect(await screen.findByRole('img', { name: 'Camiseta branca' })).toBeTruthy();
+    expect(screen.queryByRole('img', { name: 'Camiseta preta' })).toBeNull();
+  });
+
+  it('avisa quando a foto é ilustrativa e não mostra a cor escolhida', async () => {
+    const generic = makeProductDetail({
+      images: [{ id: 'g', url: 'https://exemplo.test/a.jpg', alt: 'Foto', color: null }],
+    });
+    mockApi({ ...handlers, '/catalog/products/camiseta-teste': () => ({ data: generic }) });
+    renderRoute('/produto/camiseta-teste?cor=Preto');
+
+    expect(await screen.findByText('Foto ilustrativa. A cor escolhida é Preto.')).toBeTruthy();
+  });
+
   it('deixa claro que o carrinho ainda não existe, sem fingir a compra', async () => {
     mockApi(handlers);
     renderRoute('/produto/camiseta-teste');
