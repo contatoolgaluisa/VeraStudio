@@ -168,3 +168,29 @@ imediato; as demais esperam a rolagem (`loading="lazy"`).
 
 O link do carrinho e os cards de produto levam a páginas que dizem em qual fase a funcionalidade
 chega, em vez de botões que não fazem nada.
+
+## Fase 4B: página de produto e páginas institucionais
+
+### F4-6. Regras de seleção separadas da tela
+
+A lógica de cor e tamanho (`variant-selection.ts`) é feita de funções puras, testadas sem
+renderizar nada: cada tamanho pode estar **disponível**, **esgotado** ou **inexistente** na cor
+escolhida, e só o primeiro pode ser selecionado. A quantidade vai de 1 até o `maxQuantity` da
+variação. Isso é conveniência para o cliente: na Fase 6 o backend valida tudo de novo antes de
+criar o pedido.
+
+### F4-7. Cor na URL, tamanho na memória da página
+
+`/produto/camiseta-essential?cor=Preto` abre já na cor certa, o que é útil para compartilhar. O
+tamanho não vai para a URL, porque depende da pessoa e não faz sentido num link compartilhado.
+
+### F4-8. Botão do carrinho desativado, com o motivo explícito
+
+O botão "Adicionar ao carrinho" aparece para mostrar o fluxo de seleção, mas fica desativado com
+a explicação de que o carrinho chega na Fase 6. A página de contato não tem formulário pelo mesmo
+motivo: um formulário que não envia nada seria um elemento decorativo se passando por funcional.
+
+### F4-9. Textos institucionais demonstrativos
+
+Entrega, trocas, privacidade e contato exibem um aviso de conteúdo demonstrativo. As referências
+legais (CDC art. 49 e LGPD) são reais, mas o texto não substitui a revisão de um profissional.
