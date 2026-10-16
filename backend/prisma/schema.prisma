@@ -1,0 +1,16 @@
+// Schema do banco de dados da VÉRA Studio.
+//
+// Fase 2 (fundação): apenas a configuração do gerador e do banco.
+// Os modelos (Category, Product, ProductVariant, Order...) entram na Fase 3,
+// junto com a primeira migration e o seed de demonstração.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}

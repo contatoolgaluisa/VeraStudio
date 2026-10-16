@@ -1,0 +1,11 @@
+{
+  // Configuração do build de produção: compila apenas src/ para dist/.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "sourceMap": true
+  },
+  "include": ["src"],
+  "exclude": ["**/*.test.ts"]
+}

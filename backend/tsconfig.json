@@ -1,0 +1,24 @@
+{
+  // Configuração usada pelo editor e pelo `npm run typecheck` (inclui testes).
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    // NodeNext = o TypeScript segue exatamente as regras de módulos do Node.
+    // Por isso os imports relativos terminam em ".js" (o arquivo que existirá após o build).
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["node"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "verbatimModuleSyntax": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "rootDir": ".",
+    "outDir": "dist"
+  },
+  "include": ["src", "tests", "prisma", "prisma.config.ts", "vitest.config.ts"]
+}
