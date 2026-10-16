@@ -15,14 +15,27 @@ export class ApiError extends Error {
 
 /**
  * Cliente HTTP mínimo da aplicação. Centraliza a URL base, o JSON e o
- * tratamento de erros; nas próximas fases também anexará o token de login.
+ * tratamento de erros. Com `token`, envia o login no cabeçalho Authorization.
+ * Com `json`, envia o corpo como JSON.
  */
-export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function apiFetch<T>(
+  path: string,
+  init: RequestInit & { token?: string; json?: unknown } = {},
+): Promise<T> {
+  const { token, json, ...requestInit } = init;
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+    ...(requestInit.headers as Record<string, string>),
+  };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  if (json !== undefined) headers['Content-Type'] = 'application/json';
+
   let response: Response;
   try {
     response = await fetch(`${env.apiUrl}${path}`, {
-      ...init,
-      headers: { Accept: 'application/json', ...(init.headers as Record<string, string>) },
+      ...requestInit,
+      headers,
+      body: json !== undefined ? JSON.stringify(json) : requestInit.body,
     });
   } catch {
     throw new ApiError(0, 'NETWORK_ERROR', 'Não foi possível conectar ao servidor.');

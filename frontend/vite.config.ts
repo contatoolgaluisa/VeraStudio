@@ -19,6 +19,8 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     env: {
       VITE_API_URL: 'http://localhost:3333',
+      VITE_SUPABASE_URL: 'https://projeto-teste.supabase.co',
+      VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_chave_de_teste_000000',
     },
   },
 });
