@@ -12,10 +12,7 @@ describe('parseEnv', () => {
 
     expect(config.port).toBe(3333);
     expect(config.nodeEnv).toBe('development');
-    expect(config.corsOrigins).toEqual([
-      'http://localhost:5173',
-      'https://vera-studio.vercel.app',
-    ]);
+    expect(config.corsOrigins).toEqual(['http://localhost:5173', 'https://vera-studio.vercel.app']);
   });
 
   it('converte PORT de texto para número', () => {
