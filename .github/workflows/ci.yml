@@ -75,6 +75,25 @@ jobs:
           npm run db:deploy
           npm run db:seed
 
+      # Sobe o build de produção como o Render faz (npm run start) e confere
+      # que ele responde e acessa o banco. Pega erros que só aparecem no
+      # código compilado (ex.: caminho de import errado em dist/).
+      - name: Build de produção responde
+        if: ${{ !cancelled() }}
+        env:
+          NODE_ENV: production
+          PORT: 3400
+          SUPABASE_URL: https://projeto-ci.supabase.co
+        run: |
+          npm run start -w backend > /tmp/api.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3400/health/ready > /dev/null && break
+            sleep 1
+          done
+          curl -sf http://localhost:3400/health/ready || (cat /tmp/api.log; exit 1)
+          curl -sf "http://localhost:3400/catalog/products?pageSize=1" | grep -q '"total":24' \
+            || (echo "Catálogo não respondeu com os 24 produtos do seed"; cat /tmp/api.log; exit 1)
+
       # Se a formatação falhar, anota cada arquivo no PR com o que o Prettier mudaria.
       - name: Formatação
         if: ${{ !cancelled() }}

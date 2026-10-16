@@ -205,14 +205,17 @@ Parâmetros, formatos de resposta e regras: [docs/api.md](docs/api.md).
 
 ## Implantação
 
-Documentada na Fase 8. Variáveis, URLs públicas, CORS, migrations e webhooks serão descritos em
-`docs/deploy.md`.
+Passo a passo para publicar (Vercel + Render + Supabase, planos gratuitos):
+[docs/deploy.md](docs/deploy.md). Roteiro para apresentar a loja publicada:
+[docs/demo.md](docs/demo.md).
 
 ## Limitações conhecidas (Fase 5)
 
 - O carrinho (Fase 6) e os pagamentos (Fase 7) ainda não existem. Na página do produto, o botão
   "Adicionar ao carrinho" fica desativado e diz isso. No painel, os indicadores de pedidos e
   receita aparecem só a partir da Fase 6.
+- No plano gratuito do Render, a API desliga após 15 minutos sem acesso; a primeira visita
+  seguinte leva cerca de 1 minuto (a loja mostra um aviso).
 - No painel, a cor e o tamanho de uma variação não podem ser editados depois de criados (isso
   mudaria o que já foi vendido com aquele SKU): desative a variação e cadastre outra.
 - As páginas de contato e políticas são conteúdo demonstrativo, identificado em cada página.
