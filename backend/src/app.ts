@@ -3,9 +3,11 @@ import express, { type Express } from 'express';
 import helmet from 'helmet';
 import { pinoHttp } from 'pino-http';
 import type { AppConfig } from './config/env.js';
+import type { ImageStorage } from './integrations/image-storage.js';
 import type { Logger } from './lib/logger.js';
 import type { PrismaClient } from './lib/prisma.js';
 import { createErrorHandler, notFoundHandler } from './middlewares/error-handler.js';
+import { adminRouter } from './modules/admin/admin.routes.js';
 import { requireAuth } from './modules/auth/auth.middleware.js';
 import type { TokenVerifier } from './modules/auth/token-verifier.js';
 import { catalogRouter } from './modules/catalog/catalog.routes.js';
@@ -24,6 +26,8 @@ export interface AppDependencies {
   checkDatabase: () => Promise<void>;
   /** Confere o token de login (em produção, com as chaves públicas do Supabase). */
   verifyToken: TokenVerifier;
+  /** Fotos de produtos (Supabase Storage, ou "não configurado"). */
+  imageStorage: ImageStorage;
 }
 
 export function createApp({
@@ -32,6 +36,7 @@ export function createApp({
   prisma,
   checkDatabase,
   verifyToken,
+  imageStorage,
 }: AppDependencies): Express {
   const app = express();
 
@@ -60,6 +65,7 @@ export function createApp({
   const users = createUsersRepository(prisma);
   const authenticated = requireAuth(verifyToken, users);
   app.use('/me', meRouter(authenticated, users));
+  app.use('/admin', adminRouter({ prisma, requireAuth: authenticated, storage: imageStorage }));
 
   app.use(notFoundHandler);
   app.use(createErrorHandler(logger));
