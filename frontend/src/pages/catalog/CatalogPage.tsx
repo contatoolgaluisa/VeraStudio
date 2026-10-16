@@ -88,9 +88,7 @@ export function CatalogPage({ variant }: { variant: CatalogVariant }) {
     update({ sizes: [], colors: [], minPrice: undefined, maxPrice: undefined });
   }
 
-  const filters = (
-    <FilterPanel options={filterOptions.data} state={state} onChange={update} />
-  );
+  const filters = <FilterPanel options={filterOptions.data} state={state} onChange={update} />;
   const total = products.data?.meta.total;
 
   return (
@@ -113,7 +111,9 @@ export function CatalogPage({ variant }: { variant: CatalogVariant }) {
         <section aria-labelledby="resultado">
           <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
             <p id="resultado" role="status" className="text-sm text-muted">
-              {total === undefined ? 'Carregando produtos…' : pluralize(total, 'produto', 'produtos')}
+              {total === undefined
+                ? 'Carregando produtos…'
+                : pluralize(total, 'produto', 'produtos')}
             </p>
             <div className="flex items-center gap-3">
               <Button
@@ -167,7 +167,9 @@ export function CatalogPage({ variant }: { variant: CatalogVariant }) {
             Limpar
           </Button>
           <Button className="flex-1" onClick={() => setFiltersOpen(false)}>
-            {total === undefined ? 'Ver produtos' : `Ver ${pluralize(total, 'produto', 'produtos')}`}
+            {total === undefined
+              ? 'Ver produtos'
+              : `Ver ${pluralize(total, 'produto', 'produtos')}`}
           </Button>
         </div>
       </Drawer>
