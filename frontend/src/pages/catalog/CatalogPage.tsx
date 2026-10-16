@@ -92,9 +92,9 @@ export function CatalogPage({ variant }: { variant: CatalogVariant }) {
   const total = products.data?.meta.total;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-10 lg:pt-16">
+    <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 sm:pt-10 lg:px-10 lg:pt-16">
       <header className="max-w-2xl">
-        <h1 className="text-5xl sm:text-6xl">{heading.title}</h1>
+        <h1 className="text-4xl sm:text-6xl">{heading.title}</h1>
         {heading.description && <p className="mt-3 text-muted">{heading.description}</p>}
         {variant === 'search' && <SearchForm key={state.q} className="mt-6 max-w-md" />}
       </header>
@@ -103,22 +103,23 @@ export function CatalogPage({ variant }: { variant: CatalogVariant }) {
         <CategoryLinks categories={categories.data ?? []} />
       ) : null}
 
-      <div className="mt-10 grid gap-10 lg:grid-cols-[14rem_1fr] lg:gap-14">
+      <div className="mt-6 grid gap-10 sm:mt-10 lg:grid-cols-[14rem_1fr] lg:gap-14">
         <aside aria-label="Filtros" className="hidden lg:block">
           {filters}
         </aside>
 
         <section aria-labelledby="resultado">
-          <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
+          <div className="mb-6 flex items-center justify-between gap-3 border-b border-line pb-4 sm:mb-8">
             <p id="resultado" role="status" className="text-sm text-muted">
               {total === undefined
                 ? 'Carregando produtos…'
                 : pluralize(total, 'produto', 'produtos')}
             </p>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Button
                 variant="secondary"
-                className="px-4 py-2 lg:hidden"
+                size="sm"
+                className="lg:hidden"
                 onClick={() => setFiltersOpen(true)}
                 aria-haspopup="dialog"
               >
@@ -132,7 +133,7 @@ export function CatalogPage({ variant }: { variant: CatalogVariant }) {
                 id={sortId}
                 value={state.sort}
                 onChange={(event) => update({ sort: event.target.value as SortOption })}
-                className="border border-line bg-transparent px-3 py-2 text-sm focus:border-ink"
+                className="border border-line bg-transparent px-2 py-2 text-sm focus:border-ink sm:px-3"
               >
                 {Object.entries(SORT_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>
@@ -181,13 +182,15 @@ function CategoryLinks({ categories }: { categories: { slug: string; name: strin
   if (categories.length === 0) return null;
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     cn(
-      'border px-4 py-2 text-sm transition-colors',
+      'block border px-3 py-1.5 text-sm whitespace-nowrap transition-colors sm:px-4 sm:py-2',
       isActive ? 'border-ink bg-ink text-paper' : 'border-line hover:border-ink',
     );
 
+  // No celular, as categorias ficam numa linha só, com rolagem lateral,
+  // em vez de quebrar em várias linhas.
   return (
-    <nav aria-label="Categorias" className="mt-8">
-      <ul className="flex flex-wrap gap-2">
+    <nav aria-label="Categorias" className="-mx-4 mt-6 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+      <ul className="flex w-max gap-2 sm:w-auto sm:flex-wrap">
         <li>
           <NavLink to="/loja" end className={linkClass}>
             Tudo

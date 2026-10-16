@@ -182,6 +182,9 @@ describe('navegação', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Abrir menu' }));
     const dialog = screen.getByRole('dialog', { name: 'Menu' });
     expect(within(dialog).getByRole('link', { name: 'Promoções' })).toBeTruthy();
+    // Regressão: dentro do cabeçalho (que tem backdrop-filter), o painel ficava
+    // espremido na altura dele. Ele precisa ser renderizado fora do <header>.
+    expect(dialog.closest('header')).toBeNull();
 
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(screen.queryByRole('dialog')).toBeNull();
