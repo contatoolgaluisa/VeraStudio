@@ -1,9 +1,11 @@
 import type { RouteObject } from 'react-router';
 import { CatalogPage } from '@/pages/catalog/CatalogPage';
 import { CreditsPage } from '@/pages/credits/CreditsPage';
+import { ContactPage, PrivacyPage, ReturnsPage, ShippingPage } from '@/pages/info/pages';
 import { HomePage } from '@/pages/home/HomePage';
 import { NotFoundPage } from '@/pages/not-found/NotFoundPage';
 import { UpcomingPage } from '@/pages/placeholder/UpcomingPage';
+import { ProductPage } from '@/pages/product/ProductPage';
 import { RootLayout } from './RootLayout';
 
 /** Mapa de rotas da aplicação. */
@@ -18,15 +20,7 @@ export const routes: RouteObject[] = [
       { path: 'novidades', element: <CatalogPage key="new" variant="new" /> },
       { path: 'promocoes', element: <CatalogPage key="sale" variant="sale" /> },
       { path: 'busca', element: <CatalogPage key="search" variant="search" /> },
-      {
-        path: 'produto/:slug',
-        element: (
-          <UpcomingPage
-            title="Detalhes do produto"
-            description="A página do produto, com fotos, seleção de cor e tamanho, está em construção e chega na próxima entrega (Fase 4B)."
-          />
-        ),
-      },
+      { path: 'produto/:slug', element: <ProductPage /> },
       {
         path: 'carrinho',
         element: (
@@ -36,6 +30,10 @@ export const routes: RouteObject[] = [
           />
         ),
       },
+      { path: 'contato', element: <ContactPage /> },
+      { path: 'entrega', element: <ShippingPage /> },
+      { path: 'trocas-e-devolucoes', element: <ReturnsPage /> },
+      { path: 'privacidade', element: <PrivacyPage /> },
       { path: 'creditos', element: <CreditsPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
