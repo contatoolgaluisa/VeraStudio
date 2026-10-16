@@ -4,6 +4,7 @@ import { Price } from '@/components/product/Price';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { ProductImage } from '@/components/product/ProductImage';
 import { Button } from '@/components/ui/Button';
+import { SlowStartNotice } from '@/components/ui/SlowStartNotice';
 import { StatusMessage } from '@/components/ui/StatusMessage';
 import { useProduct, useProducts } from '@/features/catalog/queries';
 import type { ProductDetail } from '@/features/catalog/types';
@@ -311,16 +312,19 @@ function RelatedProducts({ product }: { product: ProductDetail }) {
 
 function ProductSkeleton() {
   return (
-    <div
-      className="mx-auto grid max-w-7xl animate-pulse gap-10 px-4 pt-16 sm:px-6 lg:grid-cols-[7fr_5fr] lg:px-10"
-      aria-busy="true"
-      aria-label="Carregando produto"
-    >
-      <div className="aspect-[3/4] bg-paper-deep" />
-      <div className="space-y-4">
-        <div className="h-12 w-3/4 bg-paper-deep" />
-        <div className="h-6 w-1/4 bg-paper-deep" />
-        <div className="h-32 bg-paper-deep" />
+    <div className="mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-10">
+      <SlowStartNotice />
+      <div
+        className="grid animate-pulse gap-10 lg:grid-cols-[7fr_5fr]"
+        aria-busy="true"
+        aria-label="Carregando produto"
+      >
+        <div className="aspect-[3/4] bg-paper-deep" />
+        <div className="space-y-4">
+          <div className="h-12 w-3/4 bg-paper-deep" />
+          <div className="h-6 w-1/4 bg-paper-deep" />
+          <div className="h-32 bg-paper-deep" />
+        </div>
       </div>
     </div>
   );

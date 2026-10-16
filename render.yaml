@@ -1,0 +1,39 @@
+# Blueprint do Render: descreve o serviço do backend como código.
+# No Render: New > Blueprint > escolha este repositório. Os valores marcados
+# com `sync: false` são pedidos na tela (são segredos e nunca ficam no Git).
+# Passo a passo completo: docs/deploy.md
+services:
+  - type: web
+    name: vera-studio-api
+    runtime: node
+    plan: free
+    # Escolha a região mais próxima do banco no Supabase (para o Brasil,
+    # a mais próxima disponível costuma ser a costa leste dos EUA).
+    region: virginia
+    branch: main
+    # O Node é lido do .nvmrc. As dependências de desenvolvimento são
+    # necessárias para compilar (TypeScript) e para a CLI do Prisma.
+    # As migrations rodam no build: se falharem, a versão anterior continua no ar.
+    buildCommand: npm ci --include=dev && npm run db:deploy -w backend && npm run build -w backend
+    startCommand: npm run start -w backend
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: info
+      # Supabase > Connect > Transaction pooler (porta 6543)
+      - key: DATABASE_URL
+        sync: false
+      # Supabase > Connect > Session pooler (porta 5432). Usada só pelas migrations.
+      - key: DIRECT_URL
+        sync: false
+      # Project URL do Supabase (https://<projeto>.supabase.co)
+      - key: SUPABASE_URL
+        sync: false
+      # Secret key (sb_secret_...), só para o envio de fotos do painel
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      # Endereço do frontend na Vercel, sem barra no final
+      - key: CORS_ORIGINS
+        sync: false
