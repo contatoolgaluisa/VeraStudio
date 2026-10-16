@@ -8,11 +8,11 @@ import { ApiStatus } from '@/features/system/ApiStatus';
 export function HomePage() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
-      <p className="text-sm tracking-[0.2em] text-muted uppercase">Em construção · Fase 2</p>
+      <p className="text-sm tracking-[0.2em] text-muted uppercase">Em construção</p>
       <h1 className="mt-4 max-w-2xl font-serif text-4xl leading-tight sm:text-6xl">{brand.name}</h1>
       <p className="mt-6 max-w-xl text-lg text-muted">
-        A fundação do projeto está pronta. O catálogo, o carrinho e o checkout serão construídos nas
-        próximas fases.
+        A API do catálogo já está funcionando. As páginas da loja, o carrinho e o checkout serão
+        construídos nas próximas fases.
       </p>
 
       <div className="mt-12 max-w-xl">

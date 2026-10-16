@@ -81,3 +81,57 @@ Separar os dois evita que uma instabilidade passageira do banco faça o Render r
 Usamos o conjunto `recommended` do typescript-eslint, que é rápido e não depende do `tsconfig`.
 Os erros de tipo já são cobertos pelo `npm run typecheck`. Regras mais rígidas podem ser ativadas
 depois, quando houver mais código.
+
+## Fase 3: banco e produtos
+
+### F3-1. Uma migration por fase, junto do código que a usa
+
+O plano inicial previa o schema completo na Fase 3. A migration desta fase cria apenas o catálogo
+(`categories`, `products`, `product_images`, `product_variants`). Usuários, pedidos e pagamentos
+entram nas fases em que são usados, cada um com a sua migration e os seus testes. Assim cada tabela
+nasce com regras testadas, e o histórico de migrations mostra a evolução real do banco.
+
+### F3-2. Regras de integridade no próprio banco
+
+Além das chaves e índices, a migration adiciona `CHECK` constraints que o Prisma não expressa:
+estoque nunca negativo, preço maior que zero, preço "de" maior que o preço de venda, formato de
+slug e de cor hexadecimal. Mesmo que um bug no código tente gravar um valor inválido, o banco recusa.
+Há testes que comprovam essas recusas.
+
+### F3-3. Row Level Security ativado, sem políticas
+
+No Supabase, toda tabela do schema `public` fica exposta pela API automática dele (PostgREST).
+Ativar RLS sem criar políticas bloqueia esse caminho; o backend, dono das tabelas, continua com
+acesso total. Toda leitura e escrita passa pela nossa API, que valida e autoriza.
+
+### F3-4. Promoção = `compareAtPriceCents`
+
+`priceCents` é sempre o preço cobrado; `compareAtPriceCents` é o preço "de" (riscado). Isso permite
+filtrar e ordenar pelo preço real com índice, sem calcular "preço efetivo" em cada consulta.
+
+### F3-5. "Novidades" é uma marcação manual (`isNew`)
+
+Usar só a data de criação faria todo o catálogo do seed ser "novo" ao mesmo tempo. O administrador
+marca o que é novidade; a ordenação "mais recentes" continua usando `createdAt`.
+
+### F3-6. A API não expõe o estoque exato
+
+O catálogo devolve `available` e `maxQuantity` (máximo de 10 por item, limitado ao estoque).
+O número real de unidades é informação do negócio e só aparece no painel administrativo.
+
+### F3-7. Testes de integração com banco real
+
+Os testes do catálogo rodam contra um PostgreSQL de verdade (`vera_studio_test`), não contra
+simulações. Assim testam também os filtros SQL, os índices únicos e os `CHECK`. O banco de testes
+é separado do de desenvolvimento e as migrations são aplicadas nele antes de cada execução.
+
+### F3-8. Busca com `ILIKE`
+
+Suficiente para um catálogo pequeno. Para milhares de produtos, a evolução natural é um índice
+`pg_trgm` ou busca textual do PostgreSQL, com suporte a acentos (`unaccent`).
+
+### F3-9. Dependência `pg` mantida
+
+O backend não importa mais o `pg` diretamente (o health check agora usa o Prisma), mas ele continua
+como dependência do `@prisma/adapter-pg`. A remoção da linha no `package.json` fica para a próxima
+atualização de dependências, junto com a regeneração do `package-lock.json`.
