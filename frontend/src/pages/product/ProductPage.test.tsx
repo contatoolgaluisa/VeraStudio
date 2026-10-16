@@ -51,7 +51,11 @@ describe('página do produto', () => {
     fireEvent.click(await screen.findByRole('radio', { name: 'P' }));
 
     const quantity = screen.getByLabelText('Quantidade');
-    expect(within(quantity).getAllByRole('option').map((o) => o.textContent)).toEqual(['1', '2']);
+    expect(
+      within(quantity)
+        .getAllByRole('option')
+        .map((o) => o.textContent),
+    ).toEqual(['1', '2']);
     expect(screen.getByText('Restam 2 unidades neste tamanho.')).toBeTruthy();
     expect(screen.getByText('Código: T-PRE-P')).toBeTruthy();
   });

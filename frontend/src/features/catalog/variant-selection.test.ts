@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { makeProductDetail } from '@/test/fixtures';
-import { colorHasStock, findVariant, initialColor, initialSize, sizeStatus } from './variant-selection';
+import {
+  colorHasStock,
+  findVariant,
+  initialColor,
+  initialSize,
+  sizeStatus,
+} from './variant-selection';
 
 // Preto: P (2 un.), M (esgotado). Branco: só M (5 un.). Areia: G esgotado.
 const product = makeProductDetail();

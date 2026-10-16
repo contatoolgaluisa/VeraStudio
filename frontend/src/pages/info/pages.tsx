@@ -47,15 +47,15 @@ export function ShippingPage() {
       <section>
         <h2>Valores</h2>
         <p>
-          O frete é calculado por uma regra simples e configurável, definida na fase de carrinho
-          e pedidos do projeto. O valor aparece no carrinho antes da finalização da compra.
+          O frete é calculado por uma regra simples e configurável, definida na fase de carrinho e
+          pedidos do projeto. O valor aparece no carrinho antes da finalização da compra.
         </p>
       </section>
       <section>
         <h2>Acompanhamento</h2>
         <p>
-          O status de cada pedido ficaria disponível na área do cliente, com as etapas de
-          separação, envio e entrega.
+          O status de cada pedido ficaria disponível na área do cliente, com as etapas de separação,
+          envio e entrega.
         </p>
       </section>
     </InfoPage>

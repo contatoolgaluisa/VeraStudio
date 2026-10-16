@@ -37,7 +37,9 @@ export function colorHasStock(product: ProductDetail, color: string): boolean {
  */
 export function initialColor(product: ProductDetail, requested: string | null): string | undefined {
   if (requested && product.colors.some((c) => c.name === requested)) return requested;
-  return product.colors.find((c) => colorHasStock(product, c.name))?.name ?? product.colors[0]?.name;
+  return (
+    product.colors.find((c) => colorHasStock(product, c.name))?.name ?? product.colors[0]?.name
+  );
 }
 
 /** Com tamanho único, ele já vem selecionado. */

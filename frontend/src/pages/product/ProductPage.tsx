@@ -13,6 +13,7 @@ import {
   initialColor,
   initialSize,
   sizeStatus,
+  type SizeStatus,
 } from '@/features/catalog/variant-selection';
 import { ApiError } from '@/lib/api';
 import { cn } from '@/lib/cn';
@@ -73,7 +74,9 @@ function ProductView({ product }: { product: ProductDetail }) {
   }
 
   const images =
-    product.images.length > 0 ? product.images : [{ id: 'sem-foto', url: '', alt: '', color: null }];
+    product.images.length > 0
+      ? product.images
+      : [{ id: 'sem-foto', url: '', alt: '', color: null }];
 
   return (
     <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-10 lg:pt-10">
@@ -170,9 +173,7 @@ function ProductView({ product }: { product: ProductDetail }) {
           </fieldset>
 
           <fieldset className="mt-8">
-            <legend className="text-sm">
-              {singleSize ? 'Tamanho único' : 'Tamanho'}
-            </legend>
+            <legend className="text-sm">{singleSize ? 'Tamanho único' : 'Tamanho'}</legend>
             {!singleSize && (
               <div className="mt-3 flex flex-wrap gap-2">
                 {product.sizes.map((option) => {
@@ -189,6 +190,7 @@ function ProductView({ product }: { product: ProductDetail }) {
                         disabled && 'cursor-not-allowed border-line text-muted line-through',
                       )}
                     >
+                      {/* O nome lido pelo leitor de tela explica por que o tamanho está bloqueado. */}
                       <input
                         type="radio"
                         name="tamanho"
@@ -196,13 +198,10 @@ function ProductView({ product }: { product: ProductDetail }) {
                         checked={selected}
                         disabled={disabled}
                         onChange={() => chooseSize(option)}
+                        aria-label={`${option}${SIZE_STATUS_LABEL[status]}`}
                         className="sr-only"
                       />
-                      {option}
-                      {status === 'soldout' && <span className="sr-only"> (esgotado)</span>}
-                      {status === 'nonexistent' && (
-                        <span className="sr-only"> (indisponível nesta cor)</span>
-                      )}
+                      <span aria-hidden="true">{option}</span>
                     </label>
                   );
                 })}
@@ -259,6 +258,12 @@ function ProductView({ product }: { product: ProductDetail }) {
     </div>
   );
 }
+
+const SIZE_STATUS_LABEL: Record<SizeStatus, string> = {
+  available: '',
+  soldout: ' (esgotado)',
+  nonexistent: ' (indisponível nesta cor)',
+};
 
 function selectionHint(variant: ReturnType<typeof findVariant>, size: string | undefined) {
   if (!size) return 'Escolha um tamanho. O carrinho de compras chega na Fase 6 do projeto.';
