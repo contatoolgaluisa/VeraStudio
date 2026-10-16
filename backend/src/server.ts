@@ -1,7 +1,7 @@
 import { createApp } from './app.js';
 import { type AppConfig, EnvValidationError, parseEnv } from './config/env.js';
-import { createDatabase } from './lib/database.js';
 import { createLogger } from './lib/logger.js';
+import { createPrismaClient } from './lib/prisma.js';
 
 // Em desenvolvimento, lê backend/.env com o carregador nativo do Node.
 // Em produção (Render) não há arquivo: as variáveis vêm do painel.
@@ -25,8 +25,15 @@ function loadConfig(): AppConfig {
 
 const config = loadConfig();
 const logger = createLogger(config.logLevel);
-const database = createDatabase(config.databaseUrl);
-const app = createApp({ config, logger, checkDatabase: database.ping });
+const prisma = createPrismaClient(config.databaseUrl);
+const app = createApp({
+  config,
+  logger,
+  prisma,
+  checkDatabase: async () => {
+    await prisma.$queryRaw`SELECT 1`;
+  },
+});
 
 const server = app.listen(config.port, () => {
   logger.info(`API ouvindo em http://localhost:${config.port} (${config.nodeEnv})`);
@@ -37,8 +44,8 @@ const server = app.listen(config.port, () => {
 function shutdown(signal: string) {
   logger.info(`${signal} recebido, encerrando...`);
   server.close(() => {
-    database
-      .close()
+    prisma
+      .$disconnect()
       .catch((err: unknown) => logger.error({ err }, 'Erro ao fechar o banco'))
       .finally(() => process.exit(0));
   });
