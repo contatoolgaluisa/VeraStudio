@@ -3,8 +3,9 @@
 E-commerce de moda full-stack construído como **projeto de portfólio**. A loja, os produtos e os
 dados comerciais são fictícios, e nenhum pagamento real é processado (o Stripe roda em modo de teste).
 
-> **Status:** Fase 4 de 8 (interface). Home, catálogo com filtros e busca funcionam com dados reais
-> da API; página de produto, autenticação, carrinho e pagamentos chegam nas próximas entregas.
+> **Status:** Fase 4 de 8 (interface). Home, catálogo com filtros e busca, página de produto e
+> páginas institucionais funcionam com dados reais da API; autenticação, carrinho e pagamentos
+> chegam nas próximas fases.
 > Veja o [plano completo](docs/architecture.md#plano-de-fases).
 
 ## Tecnologias
@@ -157,11 +158,11 @@ Parâmetros, formatos de resposta e regras: [docs/api.md](docs/api.md).
 Documentada na Fase 8. Variáveis, URLs públicas, CORS, migrations e webhooks serão descritos em
 `docs/deploy.md`.
 
-## Limitações conhecidas (Fase 4A)
+## Limitações conhecidas (Fase 4)
 
-- A página de detalhes do produto e as páginas institucionais chegam na Fase 4B; os links levam
-  a uma página que avisa isso.
-- O carrinho (Fase 6), a autenticação (Fase 5) e os pagamentos (Fase 7) ainda não existem.
+- O carrinho (Fase 6), a autenticação (Fase 5) e os pagamentos (Fase 7) ainda não existem. Na
+  página do produto, o botão "Adicionar ao carrinho" fica desativado e diz isso.
+- As páginas de contato e políticas são conteúdo demonstrativo, identificado em cada página.
 - As fotos são ilustrativas, do Unsplash, e não mostram exatamente os produtos fictícios
   (créditos em [docs/credits.md](docs/credits.md)).
 - A busca usa `ILIKE` (contém o texto, sem diferenciar maiúsculas). Ela diferencia acentos:

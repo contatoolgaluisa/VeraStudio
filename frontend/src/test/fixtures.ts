@@ -1,5 +1,10 @@
 import { vi } from 'vitest';
-import type { Category, FilterOptions, ProductSummary } from '@/features/catalog/types';
+import type {
+  Category,
+  FilterOptions,
+  ProductDetail,
+  ProductSummary,
+} from '@/features/catalog/types';
 
 export function makeProduct(overrides: Partial<ProductSummary> = {}): ProductSummary {
   return {
@@ -18,6 +23,44 @@ export function makeProduct(overrides: Partial<ProductSummary> = {}): ProductSum
     inStock: true,
     ...overrides,
   };
+}
+
+/**
+ * Produto com uma situação de estoque variada, para testar a seleção:
+ * Preto: P (2 un.) e M (esgotado). Branco: só M (5 un.). Areia: G (esgotado).
+ */
+export function makeProductDetail(overrides: Partial<ProductDetail> = {}): ProductDetail {
+  return {
+    id: 'detalhe-1',
+    slug: 'camiseta-teste',
+    name: 'Camiseta Teste',
+    category: { slug: 'feminino', name: 'Feminino' },
+    priceCents: 12900,
+    compareAtPriceCents: null,
+    isOnSale: false,
+    discountPercent: null,
+    isNew: false,
+    description: 'Camiseta de algodão para testes.',
+    images: [],
+    colors: [
+      { name: 'Areia', hex: '#D8C8A8' },
+      { name: 'Branco', hex: '#F7F6F2' },
+      { name: 'Preto', hex: '#151515' },
+    ],
+    sizes: ['P', 'M', 'G'],
+    inStock: true,
+    variants: [
+      variant('T-ARE-G', 'Areia', '#D8C8A8', 'G', 0),
+      variant('T-BRA-M', 'Branco', '#F7F6F2', 'M', 5),
+      variant('T-PRE-P', 'Preto', '#151515', 'P', 2),
+      variant('T-PRE-M', 'Preto', '#151515', 'M', 0),
+    ],
+    ...overrides,
+  };
+}
+
+function variant(sku: string, color: string, colorHex: string, size: string, stock: number) {
+  return { id: sku, sku, color, colorHex, size, available: stock > 0, maxQuantity: stock };
 }
 
 export const categories: Category[] = [

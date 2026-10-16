@@ -32,6 +32,23 @@ export interface ProductSummary {
   inStock: boolean;
 }
 
+export interface ProductVariant {
+  id: string;
+  sku: string;
+  color: string;
+  colorHex: string;
+  size: string;
+  available: boolean;
+  /** Máximo que pode ir para o carrinho (estoque, limitado a 10). */
+  maxQuantity: number;
+}
+
+export interface ProductDetail extends Omit<ProductSummary, 'image'> {
+  description: string;
+  images: { id: string; url: string; alt: string; color: string | null }[];
+  variants: ProductVariant[];
+}
+
 export interface PageMeta {
   page: number;
   pageSize: number;

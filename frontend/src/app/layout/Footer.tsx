@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import { brand } from '@/config/brand';
-import { mainNavigation } from '@/config/navigation';
+import { infoNavigation, mainNavigation } from '@/config/navigation';
 
 export function Footer() {
   return (
@@ -27,17 +27,18 @@ export function Footer() {
           </ul>
         </nav>
 
-        <div>
-          <h2 className="font-sans text-sm font-medium tracking-normal">Sobre o projeto</h2>
+        <nav aria-label="Rodapé: atendimento">
+          <h2 className="font-sans text-sm font-medium tracking-normal">Atendimento</h2>
           <ul className="mt-3 space-y-2 text-sm text-muted">
-            <li>
-              <Link to="/creditos" className="hover:text-ink">
-                Créditos das fotos
-              </Link>
-            </li>
-            <li>{brand.contact.city}</li>
+            {infoNavigation.map((item) => (
+              <li key={item.to}>
+                <Link to={item.to} className="hover:text-ink">
+                  {item.label}
+                </Link>
+              </li>
+            ))}
           </ul>
-        </div>
+        </nav>
       </div>
     </footer>
   );

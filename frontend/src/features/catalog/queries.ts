@@ -1,5 +1,6 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { fetchCategories, fetchFilterOptions, fetchProducts } from './api';
+import { ApiError } from '@/lib/api';
+import { fetchCategories, fetchFilterOptions, fetchProduct, fetchProducts } from './api';
 import type { ProductQuery } from './types';
 
 /**
@@ -16,6 +17,16 @@ export function useProducts(query: ProductQuery) {
     // Ao trocar de filtro ou página, mantém a lista anterior na tela enquanto
     // a nova carrega, em vez de piscar um estado vazio.
     placeholderData: keepPreviousData,
+  });
+}
+
+export function useProduct(slug: string) {
+  return useQuery({
+    queryKey: ['catalog', 'product', slug],
+    queryFn: () => fetchProduct(slug),
+    // 404 é uma resposta definitiva: não adianta tentar de novo.
+    retry: (failureCount, error) =>
+      !(error instanceof ApiError && error.status === 404) && failureCount < 2,
   });
 }
 

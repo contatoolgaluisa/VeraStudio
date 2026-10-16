@@ -1,5 +1,5 @@
 import { apiFetch } from '@/lib/api';
-import type { Category, FilterOptions, ProductList, ProductQuery } from './types';
+import type { Category, FilterOptions, ProductDetail, ProductList, ProductQuery } from './types';
 
 /** Monta a query string só com os parâmetros preenchidos. */
 export function toSearchParams(query: ProductQuery): URLSearchParams {
@@ -18,6 +18,13 @@ export function toSearchParams(query: ProductQuery): URLSearchParams {
 export function fetchProducts(query: ProductQuery): Promise<ProductList> {
   const params = toSearchParams(query).toString();
   return apiFetch<ProductList>(`/catalog/products${params ? `?${params}` : ''}`);
+}
+
+export async function fetchProduct(slug: string): Promise<ProductDetail> {
+  const res = await apiFetch<{ data: ProductDetail }>(
+    `/catalog/products/${encodeURIComponent(slug)}`,
+  );
+  return res.data;
 }
 
 export async function fetchCategories(): Promise<Category[]> {
