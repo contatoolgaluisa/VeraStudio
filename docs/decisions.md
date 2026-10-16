@@ -135,3 +135,36 @@ Suficiente para um catálogo pequeno. Para milhares de produtos, a evolução na
 O backend não importa mais o `pg` diretamente (o health check agora usa o Prisma), mas ele continua
 como dependência do `@prisma/adapter-pg`. A remoção da linha no `package.json` fica para a próxima
 atualização de dependências, junto com a regeneração do `package-lock.json`.
+
+## Fase 4A: identidade visual e catálogo
+
+### F4-1. Direção visual
+
+Lookbook editorial: fundo off-white, muito espaço em branco, fotografia grande e títulos em
+**Fraunces** (serifada com eixo de tamanho óptico, mais fina e contrastada em tamanhos grandes).
+O restante da interface usa **Instrument Sans** e fica deliberadamente discreto: sem cards com
+sombra, sem gradientes, botões retos. A ousadia está concentrada em um lugar, o título da home,
+que é também o único movimento automático da loja. A cor de destaque (terracota escuro,
+`#7A3B2C`) marca promoções, foco do teclado e o item ativo da navegação.
+
+### F4-2. Filtros na URL
+
+Tamanho, cor, preço, ordenação e página ficam na URL (`/loja/feminino?tamanhos=M&ordem=menor-preco`).
+O link pode ser compartilhado, o "voltar" do navegador desfaz o último filtro e recarregar a página
+não perde nada. A URL usa preços em reais; a API recebe centavos.
+
+### F4-3. Painel lateral próprio, sem biblioteca
+
+O menu do celular e os filtros usam um componente `Drawer` com foco preso dentro do painel, Esc
+para fechar e retorno do foco ao botão que o abriu. É pouco código e evita uma dependência a mais.
+
+### F4-4. Imagens responsivas do Unsplash
+
+O Unsplash redimensiona a foto pela URL, então cada `<img>` recebe um `srcSet` com várias larguras
+e o navegador baixa a menor que fica nítida. Só a foto principal e os primeiros cards carregam de
+imediato; as demais esperam a rolagem (`loading="lazy"`).
+
+### F4-5. Páginas honestas para o que ainda não existe
+
+O link do carrinho e os cards de produto levam a páginas que dizem em qual fase a funcionalidade
+chega, em vez de botões que não fazem nada.
