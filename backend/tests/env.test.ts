@@ -4,6 +4,7 @@ import { EnvValidationError, parseEnv } from '../src/config/env.js';
 const valid = {
   DATABASE_URL: 'postgresql://vera:segredo123@localhost:5432/vera_studio',
   CORS_ORIGINS: 'http://localhost:5173, https://vera-studio.vercel.app',
+  SUPABASE_URL: 'https://exemplo.supabase.co/',
 };
 
 describe('parseEnv', () => {
@@ -15,13 +16,17 @@ describe('parseEnv', () => {
     expect(config.corsOrigins).toEqual(['http://localhost:5173', 'https://vera-studio.vercel.app']);
   });
 
+  it('remove a barra final da URL do Supabase', () => {
+    expect(parseEnv(valid).supabaseUrl).toBe('https://exemplo.supabase.co');
+  });
+
   it('converte PORT de texto para número', () => {
     expect(parseEnv({ ...valid, PORT: '8080' }).port).toBe(8080);
   });
 
   it('falha com mensagem clara quando falta DATABASE_URL', () => {
-    expect(() => parseEnv({ CORS_ORIGINS: valid.CORS_ORIGINS })).toThrow(EnvValidationError);
-    expect(() => parseEnv({ CORS_ORIGINS: valid.CORS_ORIGINS })).toThrow(/DATABASE_URL/);
+    expect(() => parseEnv({ ...valid, DATABASE_URL: undefined })).toThrow(EnvValidationError);
+    expect(() => parseEnv({ ...valid, DATABASE_URL: undefined })).toThrow(/DATABASE_URL/);
   });
 
   it('rejeita URL de banco que não seja PostgreSQL', () => {

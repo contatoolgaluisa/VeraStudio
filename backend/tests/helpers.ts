@@ -2,6 +2,7 @@ import { createApp, type AppDependencies } from '../src/app.js';
 import type { AppConfig } from '../src/config/env.js';
 import { createLogger } from '../src/lib/logger.js';
 import { createPrismaClient } from '../src/lib/prisma.js';
+import { TEST_SUPABASE_URL, testTokenVerifier } from './auth-helpers.js';
 
 try {
   process.loadEnvFile();
@@ -18,6 +19,7 @@ export const testConfig: AppConfig = {
   logLevel: 'silent',
   databaseUrl: testDatabaseUrl,
   corsOrigins: ['http://localhost:5173'],
+  supabaseUrl: TEST_SUPABASE_URL,
 };
 
 /** Cliente do Prisma apontando para o banco de TESTES. */
@@ -30,6 +32,7 @@ export function buildTestApp(overrides: Partial<AppDependencies> = {}) {
     logger: createLogger('silent'),
     prisma: testPrisma,
     checkDatabase: async () => {},
+    verifyToken: testTokenVerifier,
     ...overrides,
   });
 }
@@ -39,4 +42,9 @@ export async function resetCatalog() {
   await testPrisma.$executeRawUnsafe(
     'TRUNCATE TABLE "product_variants", "product_images", "products", "categories" CASCADE',
   );
+}
+
+/** Apaga todos os perfis de usuário no banco de testes. */
+export async function resetUsers() {
+  await testPrisma.$executeRawUnsafe('TRUNCATE TABLE "user_profiles" CASCADE');
 }

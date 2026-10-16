@@ -6,8 +6,12 @@ import type { AppConfig } from './config/env.js';
 import type { Logger } from './lib/logger.js';
 import type { PrismaClient } from './lib/prisma.js';
 import { createErrorHandler, notFoundHandler } from './middlewares/error-handler.js';
+import { requireAuth } from './modules/auth/auth.middleware.js';
+import type { TokenVerifier } from './modules/auth/token-verifier.js';
 import { catalogRouter } from './modules/catalog/catalog.routes.js';
 import { healthRouter } from './modules/health/health.routes.js';
+import { createUsersRepository } from './modules/users/users.repository.js';
+import { meRouter } from './modules/users/users.routes.js';
 
 /**
  * Dependências que o app recebe de fora. Assim os testes podem trocar
@@ -18,9 +22,17 @@ export interface AppDependencies {
   logger: Logger;
   prisma: PrismaClient;
   checkDatabase: () => Promise<void>;
+  /** Confere o token de login (em produção, com as chaves públicas do Supabase). */
+  verifyToken: TokenVerifier;
 }
 
-export function createApp({ config, logger, prisma, checkDatabase }: AppDependencies): Express {
+export function createApp({
+  config,
+  logger,
+  prisma,
+  checkDatabase,
+  verifyToken,
+}: AppDependencies): Express {
   const app = express();
 
   // O Render fica atrás de um proxy reverso; isso faz req.ip ser o IP real do
@@ -44,6 +56,10 @@ export function createApp({ config, logger, prisma, checkDatabase }: AppDependen
 
   app.use('/health', healthRouter(checkDatabase));
   app.use('/catalog', catalogRouter(prisma));
+
+  const users = createUsersRepository(prisma);
+  const authenticated = requireAuth(verifyToken, users);
+  app.use('/me', meRouter(authenticated, users));
 
   app.use(notFoundHandler);
   app.use(createErrorHandler(logger));
