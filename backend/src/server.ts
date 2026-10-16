@@ -1,5 +1,9 @@
 import { createApp } from './app.js';
 import { type AppConfig, EnvValidationError, parseEnv } from './config/env.js';
+import {
+  createSupabaseImageStorage,
+  createUnconfiguredImageStorage,
+} from './integrations/image-storage.js';
 import { createLogger } from './lib/logger.js';
 import { createPrismaClient } from './lib/prisma.js';
 import { createSupabaseTokenVerifier } from './modules/auth/token-verifier.js';
@@ -35,7 +39,17 @@ const app = createApp({
     await prisma.$queryRaw`SELECT 1`;
   },
   verifyToken: createSupabaseTokenVerifier(config.supabaseUrl),
+  imageStorage: config.supabaseSecretKey
+    ? createSupabaseImageStorage({
+        supabaseUrl: config.supabaseUrl,
+        secretKey: config.supabaseSecretKey,
+      })
+    : createUnconfiguredImageStorage(),
 });
+
+if (!config.supabaseSecretKey) {
+  logger.warn('SUPABASE_SECRET_KEY não definida: o envio de fotos pelo painel está desativado.');
+}
 
 const server = app.listen(config.port, () => {
   logger.info(`API ouvindo em http://localhost:${config.port} (${config.nodeEnv})`);

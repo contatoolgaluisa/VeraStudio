@@ -230,3 +230,42 @@ o backend, que confere login e papel em cada requisição (`requireAuth`, `requi
 
 A tela de recuperação mostra a mesma mensagem exista ou não uma conta com o e-mail informado,
 para que ninguém a use para descobrir quem é cliente da loja.
+
+## Fase 5B: painel administrativo
+
+### F5-7. Fotos enviadas direto ao Storage, conferidas depois
+
+O arquivo vai do navegador direto para o Supabase Storage, por um link de uso único que a API só
+cria depois de conferir que a pessoa é ADMIN. O caminho do arquivo é escolhido pelo servidor
+(`products/<id do produto>/<uuid>.<ext>`), então ninguém consegue sobrescrever fotos de outro
+produto. Depois do envio, a API confere o arquivo que realmente chegou (tipo e tamanho), e não o
+que o navegador declarou; se não servir, apaga o arquivo e recusa. Assim a foto não passa pelo
+nosso servidor (sem limite de corpo, sem custo de banda no Render) e a secret key do Supabase
+nunca sai do backend.
+
+### F5-8. Estoque ajustado de forma relativa e atômica
+
+O painel não envia "o estoque agora é 10", e sim "+5" ou "-2". Se uma venda acontecer enquanto o
+administrador está com a tela aberta, um valor absoluto apagaria essa venda. O ajuste é um único
+`UPDATE ... SET stock = stock + delta WHERE stock >= -delta`: se dois ajustes chegarem ao mesmo
+tempo, o banco aplica um de cada vez, e o estoque nunca fica negativo (teste com ajustes
+simultâneos em `backend/tests/admin.test.ts`).
+
+### F5-9. Regras de publicação no servidor
+
+Um produto só é publicado com ao menos uma variação ativa, e a última variação ativa de um produto
+publicado não pode ser desativada (ele sumiria da loja sem aviso). Produtos novos nascem como
+rascunho. Categorias só podem ser excluídas sem produtos. O painel mostra as mensagens que o
+servidor devolve, em vez de repetir as regras na tela.
+
+### F5-10. Cor e tamanho fixos depois de criados
+
+Uma variação representa uma peça física identificada pelo SKU. Mudar a cor ou o tamanho dela
+alteraria o significado de pedidos já feitos (Fase 6). Para corrigir, desativa-se a variação e
+cria-se outra. Variações não são excluídas, pelo mesmo motivo.
+
+### F5-11. Indicadores sem números inventados
+
+O dashboard calcula tudo na hora a partir do banco. Pedidos e receita ainda não existem, então a
+API responde `orders: null` e a tela explica que esses números chegam na Fase 6. Estoque baixo é
+"3 unidades ou menos", contando só variações ativas de produtos que não estão arquivados.

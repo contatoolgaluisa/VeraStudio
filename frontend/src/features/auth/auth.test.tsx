@@ -61,7 +61,7 @@ describe('páginas protegidas', () => {
     setFakeSession(anaSession);
     renderRoute('/admin');
 
-    expect(await screen.findByRole('heading', { name: 'Painel administrativo' })).toBeTruthy();
+    expect(await screen.findByRole('navigation', { name: 'Painel administrativo' })).toBeTruthy();
   });
 });
 

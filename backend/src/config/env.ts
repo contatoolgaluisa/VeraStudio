@@ -28,6 +28,14 @@ const envSchema = z.object({
   SUPABASE_URL: z
     .url({ protocol: /^https?$/, error: 'SUPABASE_URL deve ser a Project URL do Supabase' })
     .transform((url) => url.replace(/\/+$/, '')),
+  // Opcional: sem ela, o envio de fotos fica desativado com um aviso claro.
+  SUPABASE_SECRET_KEY: z
+    .string()
+    .optional()
+    .transform((key) => key?.trim() || null)
+    .refine((key) => key === null || !key.startsWith('sb_publishable_'), {
+      error: 'SUPABASE_SECRET_KEY recebeu a chave publishable. Use a secret key (sb_secret_...).',
+    }),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -40,6 +48,8 @@ export interface AppConfig {
   databaseUrl: string;
   corsOrigins: string[];
   supabaseUrl: string;
+  /** null quando não configurada (envio de fotos desativado). */
+  supabaseSecretKey: string | null;
 }
 
 export class EnvValidationError extends Error {
@@ -70,5 +80,6 @@ export function parseEnv(source: Record<string, string | undefined>): AppConfig 
     databaseUrl: env.DATABASE_URL,
     corsOrigins: env.CORS_ORIGINS,
     supabaseUrl: env.SUPABASE_URL,
+    supabaseSecretKey: env.SUPABASE_SECRET_KEY,
   };
 }

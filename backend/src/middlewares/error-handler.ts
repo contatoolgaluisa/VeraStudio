@@ -1,5 +1,6 @@
 import type { ErrorRequestHandler, RequestHandler } from 'express';
 import { ZodError } from 'zod';
+import { Prisma } from '../generated/prisma/client.js';
 import { AppError, type ErrorBody } from '../lib/errors.js';
 import type { Logger } from '../lib/logger.js';
 
@@ -42,6 +43,20 @@ export function createErrorHandler(logger: Logger): ErrorRequestHandler {
           message: 'Dados inválidos',
           details: err.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
         },
+      };
+    } else if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
+      // Registro não encontrado em update/delete.
+      status = 404;
+      body = { error: { code: 'NOT_FOUND', message: 'Registro não encontrado' } };
+    } else if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+      // Violação de valor único (ex.: dois produtos com o mesmo endereço).
+      status = 409;
+      body = { error: { code: 'CONFLICT', message: 'Já existe um registro com esses dados.' } };
+    } else if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2003') {
+      // Chave estrangeira inválida (ex.: categoria que não existe).
+      status = 422;
+      body = {
+        error: { code: 'INVALID_REFERENCE', message: 'Um dos itens relacionados não existe.' },
       };
     } else if (isBodyParseError(err)) {
       status = 400;

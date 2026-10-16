@@ -3,6 +3,7 @@ import type { AppConfig } from '../src/config/env.js';
 import { createLogger } from '../src/lib/logger.js';
 import { createPrismaClient } from '../src/lib/prisma.js';
 import { TEST_SUPABASE_URL, testTokenVerifier } from './auth-helpers.js';
+import { createFakeStorage } from './fake-storage.js';
 
 try {
   process.loadEnvFile();
@@ -20,7 +21,11 @@ export const testConfig: AppConfig = {
   databaseUrl: testDatabaseUrl,
   corsOrigins: ['http://localhost:5173'],
   supabaseUrl: TEST_SUPABASE_URL,
+  supabaseSecretKey: null,
 };
+
+/** Storage em memória compartilhado pelos testes. */
+export const fakeStorage = createFakeStorage();
 
 /** Cliente do Prisma apontando para o banco de TESTES. */
 export const testPrisma = createPrismaClient(testDatabaseUrl);
@@ -33,6 +38,7 @@ export function buildTestApp(overrides: Partial<AppDependencies> = {}) {
     prisma: testPrisma,
     checkDatabase: async () => {},
     verifyToken: testTokenVerifier,
+    imageStorage: fakeStorage.storage,
     ...overrides,
   });
 }

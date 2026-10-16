@@ -20,6 +20,19 @@ describe('parseEnv', () => {
     expect(parseEnv(valid).supabaseUrl).toBe('https://exemplo.supabase.co');
   });
 
+  it('trata a secret key do Supabase como opcional', () => {
+    expect(parseEnv(valid).supabaseSecretKey).toBeNull();
+    expect(parseEnv({ ...valid, SUPABASE_SECRET_KEY: 'sb_secret_abc' }).supabaseSecretKey).toBe(
+      'sb_secret_abc',
+    );
+  });
+
+  it('recusa a chave publishable no lugar da secret key', () => {
+    expect(() => parseEnv({ ...valid, SUPABASE_SECRET_KEY: 'sb_publishable_abc' })).toThrow(
+      /SUPABASE_SECRET_KEY/,
+    );
+  });
+
   it('converte PORT de texto para número', () => {
     expect(parseEnv({ ...valid, PORT: '8080' }).port).toBe(8080);
   });

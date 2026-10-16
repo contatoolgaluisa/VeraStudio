@@ -14,6 +14,7 @@ export function createLogger(level: string): Logger {
         'req.headers.authorization',
         'req.headers.cookie',
         'req.headers["stripe-signature"]',
+        'req.headers.apikey',
         'res.headers["set-cookie"]',
       ],
       censor: '[REDACTED]',

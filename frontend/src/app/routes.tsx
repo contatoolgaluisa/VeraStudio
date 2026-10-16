@@ -1,7 +1,11 @@
 import type { RouteObject } from 'react-router';
 import { RequireAdmin, RequireAuth } from '@/features/auth/guards';
 import { AccountPage } from '@/pages/account/AccountPage';
-import { AdminPage } from '@/pages/admin/AdminPage';
+import { AdminLayout } from '@/pages/admin/AdminLayout';
+import { CategoriesPage } from '@/pages/admin/CategoriesPage';
+import { DashboardPage } from '@/pages/admin/DashboardPage';
+import { EditProductPage, NewProductPage } from '@/pages/admin/ProductEditorPage';
+import { ProductsPage } from '@/pages/admin/ProductsPage';
 import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage';
@@ -54,10 +58,17 @@ export const routes: RouteObject[] = [
         element: (
           <RequireAuth>
             <RequireAdmin>
-              <AdminPage />
+              <AdminLayout />
             </RequireAdmin>
           </RequireAuth>
         ),
+        children: [
+          { index: true, element: <DashboardPage /> },
+          { path: 'produtos', element: <ProductsPage /> },
+          { path: 'produtos/novo', element: <NewProductPage /> },
+          { path: 'produtos/:id', element: <EditProductPage /> },
+          { path: 'categorias', element: <CategoriesPage /> },
+        ],
       },
       { path: 'contato', element: <ContactPage /> },
       { path: 'entrega', element: <ShippingPage /> },
