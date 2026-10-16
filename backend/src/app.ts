@@ -9,6 +9,7 @@ import type { PrismaClient } from './lib/prisma.js';
 import { createErrorHandler, notFoundHandler } from './middlewares/error-handler.js';
 import { adminRouter } from './modules/admin/admin.routes.js';
 import { requireAuth } from './modules/auth/auth.middleware.js';
+import { cartRouter } from './modules/cart/cart.routes.js';
 import type { TokenVerifier } from './modules/auth/token-verifier.js';
 import { catalogRouter } from './modules/catalog/catalog.routes.js';
 import { healthRouter } from './modules/health/health.routes.js';
@@ -61,6 +62,7 @@ export function createApp({
 
   app.use('/health', healthRouter(checkDatabase));
   app.use('/catalog', catalogRouter(prisma));
+  app.use('/cart', cartRouter(prisma, config.shipping));
 
   const users = createUsersRepository(prisma);
   const authenticated = requireAuth(verifyToken, users);

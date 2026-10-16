@@ -20,6 +20,13 @@ describe('parseEnv', () => {
     expect(parseEnv(valid).supabaseUrl).toBe('https://exemplo.supabase.co');
   });
 
+  it('usa a regra de frete padrão e aceita outra pelo ambiente', () => {
+    expect(parseEnv(valid).shipping).toEqual({ flatCents: 1990, freeMinCents: 29900 });
+    expect(
+      parseEnv({ ...valid, SHIPPING_FLAT_CENTS: '0', FREE_SHIPPING_MIN_CENTS: '15000' }).shipping,
+    ).toEqual({ flatCents: 0, freeMinCents: 15000 });
+  });
+
   it('trata a secret key do Supabase como opcional', () => {
     expect(parseEnv(valid).supabaseSecretKey).toBeNull();
     expect(parseEnv({ ...valid, SUPABASE_SECRET_KEY: 'sb_secret_abc' }).supabaseSecretKey).toBe(

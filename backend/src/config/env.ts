@@ -36,6 +36,9 @@ const envSchema = z.object({
     .refine((key) => key === null || !key.startsWith('sb_publishable_'), {
       error: 'SUPABASE_SECRET_KEY recebeu a chave publishable. Use a secret key (sb_secret_...).',
     }),
+  // Regra de frete demonstrativa (decisão D8): valor fixo, grátis acima de um mínimo.
+  SHIPPING_FLAT_CENTS: z.coerce.number().int().min(0).max(100_000).default(1990),
+  FREE_SHIPPING_MIN_CENTS: z.coerce.number().int().min(0).max(10_000_000).default(29900),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -50,6 +53,13 @@ export interface AppConfig {
   supabaseUrl: string;
   /** null quando não configurada (envio de fotos desativado). */
   supabaseSecretKey: string | null;
+  /** Frete em centavos: valor fixo e mínimo do pedido para frete grátis. */
+  shipping: ShippingRule;
+}
+
+export interface ShippingRule {
+  flatCents: number;
+  freeMinCents: number;
 }
 
 export class EnvValidationError extends Error {
@@ -81,5 +91,6 @@ export function parseEnv(source: Record<string, string | undefined>): AppConfig 
     corsOrigins: env.CORS_ORIGINS,
     supabaseUrl: env.SUPABASE_URL,
     supabaseSecretKey: env.SUPABASE_SECRET_KEY,
+    shipping: { flatCents: env.SHIPPING_FLAT_CENTS, freeMinCents: env.FREE_SHIPPING_MIN_CENTS },
   };
 }
