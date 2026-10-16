@@ -85,7 +85,7 @@ afterEach(() => {
 });
 
 describe('visão geral', () => {
-  it('mostra os números da API e não inventa pedidos', async () => {
+  it('mostra os números calculados pela API', async () => {
     const summary: DashboardSummary = {
       products: { total: 24, published: 20, draft: 3, archived: 1 },
       stock: { threshold: 3, lowStock: 2, outOfStock: 1 },
@@ -98,7 +98,7 @@ describe('visão geral', () => {
           product: { id: PRODUCT_ID, name: 'Camiseta Essential' },
         },
       ],
-      orders: null,
+      orders: { total: 3, pendingPayment: 1, toFulfill: 2, paidRevenueCents: 45900 },
     };
     const fetchMock = mockApi({ '/me': () => me, '/admin/dashboard': () => ({ data: summary }) });
     loginAsAdmin();
@@ -106,7 +106,10 @@ describe('visão geral', () => {
 
     expect(await screen.findByRole('heading', { name: 'Visão geral' })).toBeTruthy();
     expect(screen.getByText('Publicados').nextElementSibling?.textContent).toBe('20');
-    expect(screen.getByText(/disponíveis|aparecem aqui a partir da Fase 6/)).toBeTruthy();
+    expect(screen.getByText('Para separar e enviar').nextElementSibling?.textContent).toBe('2');
+    expect(screen.getByText('Receita de pedidos pagos').nextElementSibling?.textContent).toMatch(
+      /R\$\s?459,00/,
+    );
     expect(screen.getByRole('link', { name: 'Camiseta Essential' }).getAttribute('href')).toBe(
       `/admin/produtos/${PRODUCT_ID}`,
     );

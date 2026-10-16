@@ -18,8 +18,14 @@ export interface DashboardSummary {
     stock: number;
     product: { id: string; name: string };
   }[];
-  /** null até a Fase 6 (pedidos ainda não existem). */
-  orders: null;
+  orders: {
+    total: number;
+    pendingPayment: number;
+    /** Pagos ou em separação: precisam de ação da loja. */
+    toFulfill: number;
+    /** Soma dos pedidos com pagamento confirmado. */
+    paidRevenueCents: number;
+  };
 }
 
 export interface AdminProductRow {

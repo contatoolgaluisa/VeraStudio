@@ -3,7 +3,7 @@ import { ButtonLink } from '@/components/ui/Button';
 import { useDashboard } from '@/features/admin/api';
 import { AdminError, AdminLoading } from '@/features/admin/components/AdminState';
 import { cn } from '@/lib/cn';
-import { pluralize } from '@/lib/format';
+import { formatPrice, pluralize } from '@/lib/format';
 
 function Tile({ label, value, note }: { label: string; value: number; note?: string }) {
   return (
@@ -24,7 +24,7 @@ export function DashboardPage() {
     return <AdminError error={dashboard.error} onRetry={() => void dashboard.refetch()} />;
   }
 
-  const { products, stock, lowStockItems } = dashboard.data;
+  const { products, stock, lowStockItems, orders } = dashboard.data;
 
   return (
     <div>
@@ -48,13 +48,31 @@ export function DashboardPage() {
       </section>
 
       <section aria-labelledby="pedidos-titulo" className="mt-12">
-        <h2 id="pedidos-titulo" className="text-2xl">
-          Pedidos e receita
-        </h2>
-        <p className="mt-4 border border-dashed border-line p-5 text-sm text-muted">
-          Os pedidos recebidos, pendentes e a receita de pedidos pagos aparecem aqui a partir da
-          Fase 6, quando o carrinho e os pedidos forem implementados. Nenhum número é exibido antes
-          disso para não mostrar dados inventados.
+        <div className="flex flex-wrap items-baseline justify-between gap-4">
+          <h2 id="pedidos-titulo" className="text-2xl">
+            Pedidos e receita
+          </h2>
+          <Link
+            to="/admin/pedidos"
+            className="text-sm underline underline-offset-4 hover:text-accent"
+          >
+            Ver pedidos
+          </Link>
+        </div>
+        <dl className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <Tile label="Pedidos recebidos" value={orders.total} />
+          <Tile label="Aguardando pagamento" value={orders.pendingPayment} />
+          <Tile label="Para separar e enviar" value={orders.toFulfill} />
+          <div className="border border-line p-5">
+            <dt className="text-sm text-muted">Receita de pedidos pagos</dt>
+            <dd className="mt-2 font-serif text-3xl tabular-nums">
+              {formatPrice(orders.paidRevenueCents)}
+            </dd>
+          </div>
+        </dl>
+        <p className="mt-3 text-xs text-muted">
+          A receita soma só pedidos com pagamento confirmado. A confirmação vem do Stripe (Fase 7):
+          até lá, ela fica em R$ 0,00.
         </p>
       </section>
 
