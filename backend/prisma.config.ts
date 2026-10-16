@@ -22,5 +22,10 @@ export default defineConfig({
     // Migrations usam a conexão DIRETA (não o pooler), pois precisam de
     // recursos de sessão que o pooler em modo transação não oferece.
     url: env('DIRECT_URL'),
+    // Banco temporário de conferência das migrations. Opcional: localmente o
+    // `prisma migrate dev` cria um sozinho; o CI informa um próprio.
+    ...(process.env.SHADOW_DATABASE_URL
+      ? { shadowDatabaseUrl: process.env.SHADOW_DATABASE_URL }
+      : {}),
   },
 });

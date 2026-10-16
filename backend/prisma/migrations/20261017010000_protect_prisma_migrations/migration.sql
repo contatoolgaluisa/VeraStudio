@@ -8,4 +8,14 @@
 -- Com RLS ativado e nenhuma política, a API automática não acessa nada. O
 -- Prisma continua funcionando porque conecta como dono da tabela, e o dono
 -- não é afetado pelo RLS.
-ALTER TABLE "_prisma_migrations" ENABLE ROW LEVEL SECURITY;
+--
+-- A tabela só existe nos bancos reais. O `prisma migrate dev` também aplica as
+-- migrations num banco temporário de conferência (shadow database), onde ela
+-- não é criada; por isso o comando só roda quando a tabela existe.
+DO $$
+BEGIN
+    IF to_regclass('public."_prisma_migrations"') IS NOT NULL THEN
+        ALTER TABLE "_prisma_migrations" ENABLE ROW LEVEL SECURITY;
+    END IF;
+END
+$$;
