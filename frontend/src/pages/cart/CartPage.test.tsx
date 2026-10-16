@@ -171,6 +171,10 @@ describe('carrinho', () => {
 
     expect(await screen.findByText(/Indisponível: esgotado ou fora da loja/)).toBeTruthy();
     expect(screen.getByText('Remova os itens indisponíveis para continuar.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Finalizar compra' })).toHaveProperty(
+      'disabled',
+      true,
+    );
 
     fireEvent.click(screen.getByRole('button', { name: 'Remover Vestido Antigo, Preto, M' }));
 
@@ -180,7 +184,7 @@ describe('carrinho', () => {
     expect(cart.getItems().map((current) => current.variantId)).toEqual(['camisa']);
   });
 
-  it('altera a quantidade e não finge o fechamento do pedido', async () => {
+  it('altera a quantidade e leva ao checkout quando tudo está disponível', async () => {
     load(item('camisa', 'Camisa Linho', 1));
     mockApi({ '/cart/quote': () => quote([line('camisa', 'Camisa Linho')]) });
     renderRoute('/carrinho');
@@ -189,10 +193,9 @@ describe('carrinho', () => {
       await screen.findByRole('button', { name: 'Aumentar quantidade de Camisa Linho, Preto, M' }),
     );
     expect(cart.getItems()[0]?.quantity).toBe(2);
-    expect(screen.getByRole('button', { name: 'Finalizar compra' })).toHaveProperty(
-      'disabled',
-      true,
-    );
+    expect(
+      (await screen.findByRole('link', { name: 'Finalizar compra' })).getAttribute('href'),
+    ).toBe('/checkout');
   });
 
   it('avisa quando não consegue conferir os preços', async () => {

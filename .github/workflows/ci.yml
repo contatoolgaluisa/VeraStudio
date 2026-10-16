@@ -46,7 +46,9 @@ jobs:
         run: npm ci
 
       - name: Criar banco de testes
-        run: psql "postgresql://vera:vera_ci@localhost:5432/vera_studio" -c "CREATE DATABASE vera_studio_test;"
+        run: |
+          psql "postgresql://vera:vera_ci@localhost:5432/vera_studio" -c "CREATE DATABASE vera_studio_test;"
+          psql "postgresql://vera:vera_ci@localhost:5432/vera_studio" -c "CREATE DATABASE vera_studio_shadow;"
 
       # Cada verificação roda mesmo se a anterior falhar (`if: !cancelled()`),
       # para que um único CI mostre todos os problemas de uma vez.
@@ -66,6 +68,22 @@ jobs:
       - name: Build
         if: ${{ !cancelled() }}
         run: npm run build
+
+      # Faz o que o `npm run db:migrate` faz na máquina de quem desenvolve:
+      # aplica todas as migrations num banco vazio de conferência (shadow) e
+      # compara o resultado com o schema.prisma. Falha se uma migration não
+      # roda nesse banco ou se o SQL escrito à mão não bate com o schema.
+      - name: Migrations conferem com o schema
+        if: ${{ !cancelled() }}
+        working-directory: backend
+        env:
+          SHADOW_DATABASE_URL: postgresql://vera:vera_ci@localhost:5432/vera_studio_shadow
+        run: |
+          npx prisma migrate diff \
+            --from-migrations prisma/migrations \
+            --to-schema prisma/schema.prisma \
+            --exit-code \
+            || (echo "As migrations não conferem com o schema.prisma (veja a diferença acima)."; exit 1)
 
       # Garante que as migrations e o seed funcionam do zero, como no deploy.
       - name: Migrations e seed

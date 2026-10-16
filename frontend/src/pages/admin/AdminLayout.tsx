@@ -3,6 +3,7 @@ import { cn } from '@/lib/cn';
 
 const links = [
   { to: '/admin', label: 'Visão geral', end: true },
+  { to: '/admin/pedidos', label: 'Pedidos', end: false },
   { to: '/admin/produtos', label: 'Produtos', end: false },
   { to: '/admin/categorias', label: 'Categorias', end: false },
 ];

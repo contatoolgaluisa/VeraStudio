@@ -10,8 +10,8 @@
 // Regras que o Prisma não expressa (CHECK constraints e Row Level Security)
 // ficam no SQL da migration, em prisma/migrations.
 //
-// Fase 3: catálogo. Fase 5: perfis de usuário. Pedidos e pagamentos entram
-// nas fases 6 e 7, cada um com a sua migration.
+// Fase 3: catálogo. Fase 5: perfis de usuário. Fase 6: pedidos.
+// Pagamentos entram na Fase 7, com a sua migration.
 
 generator client {
   provider            = "prisma-client"
@@ -109,7 +109,8 @@ model ProductVariant {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
 
   // Impede duas variações iguais (ex.: dois "Preto / M") no mesmo produto.
   @@unique([productId, color, size])
@@ -137,5 +138,106 @@ model UserProfile {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  orders         Order[]
+  statusChanges  OrderStatusHistory[]
+
   @@map("user_profiles")
+}
+
+/// Situação do pedido. As mudanças permitidas ficam em orders/order-status.ts:
+///
+///   PENDING_PAYMENT ──(pagamento confirmado pelo Stripe, Fase 7)──> PAID
+///   PENDING_PAYMENT ──(30 min sem pagamento)──> EXPIRED
+///   PENDING_PAYMENT ──(cliente ou administrador desiste)──> CANCELLED
+///   PAID ──> PROCESSING ──> SHIPPED ──> DELIVERED   (administrador)
+///
+/// Ninguém marca PAID pelo painel: só a confirmação do pagamento.
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  EXPIRED
+}
+
+model Order {
+  id     String      @id @default(uuid(7)) @db.Uuid
+  /// Número curto para o cliente e o atendimento (#1001, #1002...).
+  number Int         @unique @default(autoincrement())
+  userId String      @map("user_id") @db.Uuid
+  status OrderStatus @default(PENDING_PAYMENT)
+  /// E-mail no momento da compra (o perfil pode mudar depois).
+  customerEmail  String @map("customer_email")
+  /// Chave enviada pelo navegador para que um clique duplo não crie dois pedidos.
+  idempotencyKey String @map("idempotency_key") @db.Uuid
+
+  /// Valores calculados no servidor, em centavos, congelados na criação.
+  itemCount     Int @map("item_count")
+  subtotalCents Int @map("subtotal_cents")
+  discountCents Int @map("discount_cents")
+  shippingCents Int @map("shipping_cents")
+  totalCents    Int @map("total_cents")
+
+  /// Até quando o estoque fica reservado esperando o pagamento.
+  reservationExpiresAt DateTime @map("reservation_expires_at")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  // Restrict: um cliente com pedidos não pode ser apagado (histórico de vendas).
+  user          UserProfile          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  items         OrderItem[]
+  statusHistory OrderStatusHistory[]
+
+  @@unique([userId, idempotencyKey])
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@index([status, reservationExpiresAt])
+  @@map("orders")
+}
+
+/// Cópia do item no momento da compra. Se o produto mudar de nome ou preço
+/// depois, o pedido continua mostrando o que foi comprado.
+model OrderItem {
+  id                  String  @id @default(uuid(7)) @db.Uuid
+  orderId             String  @map("order_id") @db.Uuid
+  /// Referência à variação, para devolver o estoque. Os dados abaixo são cópias.
+  variantId           String  @map("variant_id") @db.Uuid
+  productName         String  @map("product_name")
+  productSlug         String  @map("product_slug")
+  sku                 String
+  color               String
+  size                String
+  imageUrl            String? @map("image_url")
+  unitPriceCents      Int     @map("unit_price_cents")
+  compareAtPriceCents Int?    @map("compare_at_price_cents")
+  quantity            Int
+  lineTotalCents      Int     @map("line_total_cents")
+
+  order   Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  // Restrict: uma variação vendida não pode ser apagada (só desativada).
+  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([variantId])
+  @@map("order_items")
+}
+
+/// Registro de cada mudança de situação: quem, quando, de onde para onde.
+model OrderStatusHistory {
+  id          String       @id @default(uuid(7)) @db.Uuid
+  orderId     String       @map("order_id") @db.Uuid
+  fromStatus  OrderStatus? @map("from_status")
+  toStatus    OrderStatus  @map("to_status")
+  /// Quem fez a mudança. Nulo quando foi o próprio sistema (ex.: reserva expirada).
+  changedById String?      @map("changed_by_id") @db.Uuid
+  note        String?
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  order     Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  changedBy UserProfile? @relation(fields: [changedById], references: [id], onDelete: SetNull)
+
+  @@index([orderId, createdAt])
+  @@map("order_status_history")
 }

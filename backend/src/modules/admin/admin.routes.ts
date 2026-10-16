@@ -9,9 +9,11 @@ import {
   createProductSchema,
   createVariantSchema,
   idParamsSchema,
+  listAdminOrdersSchema,
   listAdminProductsSchema,
   updateCategorySchema,
   updateImageSchema,
+  updateOrderStatusSchema,
   updateProductSchema,
   updateVariantSchema,
   uploadUrlSchema,
@@ -19,6 +21,7 @@ import {
 import { createAdminCategoriesService } from './categories.service.js';
 import { createDashboardService } from './dashboard.service.js';
 import { createAdminImagesService } from './images.service.js';
+import { createAdminOrdersService } from './orders.service.js';
 import { createAdminProductsService } from './products.service.js';
 
 /**
@@ -37,6 +40,7 @@ export function adminRouter(options: {
   const categories = createAdminCategoriesService(prisma);
   const images = createAdminImagesService(prisma, storage);
   const dashboard = createDashboardService(prisma);
+  const orders = createAdminOrdersService(prisma);
 
   const router = Router();
   router.use(options.requireAuth, requireRole(Role.ADMIN));
@@ -90,6 +94,20 @@ export function adminRouter(options: {
     const { id } = idParamsSchema.parse(req.params);
     await images.remove(id);
     res.status(204).end();
+  });
+
+  // Pedidos
+  router.get('/orders', async (req, res) => {
+    res.json(await orders.list(listAdminOrdersSchema.parse(req.query)));
+  });
+  router.get('/orders/:id', async (req, res) => {
+    const { id } = idParamsSchema.parse(req.params);
+    res.json({ data: await orders.getOrder(id) });
+  });
+  router.post('/orders/:id/status', async (req, res) => {
+    const { id } = idParamsSchema.parse(req.params);
+    const { status, note } = updateOrderStatusSchema.parse(req.body);
+    res.json({ data: await orders.updateStatus(id, req.user!.id, status, note) });
   });
 
   // Categorias

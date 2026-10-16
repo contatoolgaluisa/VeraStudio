@@ -301,3 +301,60 @@ estoque exato: o máximo por item é o menor entre o estoque e 10.
 R$ 19,90 para todo o Brasil, grátis quando o valor dos produtos, já com desconto, chega a
 R$ 299,00. Os dois valores vêm de variáveis de ambiente com esses padrões. O cálculo é uma função
 pura (`backend/src/modules/cart/pricing.ts`), que a Fase 6B reutiliza para o pedido.
+
+## Fase 6B: pedidos
+
+### F6-5. Reserva na criação do pedido, numa única transação
+
+Ao criar o pedido, o servidor confere todos os itens e, na mesma transação, baixa o estoque com
+`UPDATE ... SET stock = stock - n WHERE stock >= n` para cada variação, em ordem fixa de id. Se
+qualquer baixa não acontecer (outra compra levou a peça no mesmo instante), a transação inteira é
+desfeita: ou todos os itens ficam reservados, ou nenhum. O teste de "última peça" faz duas
+compras simultâneas e confere que só uma passa e o estoque nunca fica negativo. A ordem fixa evita
+que duas compras com os mesmos itens fiquem esperando uma pela outra (deadlock).
+
+### F6-6. Pedido não corrige o carrinho sozinho
+
+O orçamento do carrinho (`/cart/quote`) ajusta quantidades e avisa. A criação do pedido, não: se
+algo mudou desde a revisão, responde `409 CART_CHANGED` com a lista do que mudou, e o cliente
+revisa o carrinho. Assim ninguém é cobrado por algo diferente do que viu na tela.
+
+### F6-7. Expiração em 30 minutos, com liberação idempotente
+
+O pedido nasce `PENDING_PAYMENT` com `reservationExpiresAt` = criação + 30 min (o mínimo do Stripe
+Checkout, que a Fase 7 vai usar como prazo da sessão de pagamento). A liberação muda a situação
+com uma condição ("só se ainda estiver aguardando pagamento") antes de devolver o estoque. Duas
+liberações ao mesmo tempo (expiração e cancelamento, ou dois processos) devolvem o estoque uma vez
+só. As reservas vencidas são liberadas a cada minuto pelo servidor e também antes de criar ou
+listar pedidos, porque o servidor gratuito do Render "dorme" e o relógio para junto.
+
+Ponto para a Fase 7: um pagamento que chegue depois da expiração precisa ser tratado (reservar de
+novo, se houver estoque, ou reembolsar automaticamente).
+
+### F6-8. Proteções contra abuso da reserva
+
+Reservar sem pagar "segura" estoque. Por isso: no máximo 3 pedidos aguardando pagamento por
+cliente; no máximo 10 criações por minuto por cliente (`express-rate-limit`, contador em memória,
+suficiente para um único servidor); e a chave de idempotência, que faz um clique duplo ou uma nova
+tentativa após erro de rede devolver o mesmo pedido em vez de criar outro.
+
+### F6-9. Situações e transições explícitas, com histórico
+
+As transições permitidas ficam em uma tabela (`orders/order-status.ts`). O painel pode cancelar um
+pedido aguardando pagamento e avançar `PAID → PROCESSING → SHIPPED → DELIVERED`. Não existe
+transição manual para `PAID`: só a confirmação do pagamento (Fase 7). Cancelar um pedido pago
+exige reembolso e chega com o Stripe. Cada mudança grava quem fez (ou "sistema"), quando, de onde
+para onde e uma observação opcional. A mudança é condicional à situação atual, então duas pessoas
+mudando o mesmo pedido ao mesmo tempo não se sobrescrevem.
+
+### F6-10. Pedido guarda uma cópia do que foi comprado
+
+Nome, endereço do produto, SKU, cor, tamanho, foto, preços e quantidade ficam copiados no
+`OrderItem`, e os totais no `Order`, com `CHECK`s no banco (total = subtotal − desconto + frete;
+total da linha = preço × quantidade). Alterar ou arquivar o produto depois não muda o pedido. A
+variação vendida não pode ser apagada (chave estrangeira `RESTRICT`), só desativada.
+
+### F6-11. Cliente só enxerga os próprios pedidos
+
+Todas as consultas de pedido filtram pelo usuário do token. Pedido de outra pessoa responde 404,
+como se não existisse, para não confirmar que aquele id é válido.

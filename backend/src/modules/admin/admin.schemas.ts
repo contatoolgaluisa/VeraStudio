@@ -12,6 +12,39 @@ const priceCents = z.number().int('Use centavos (número inteiro)').min(1).max(1
 const hex = z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Cor no formato #RRGGBB');
 const uuid = z.uuid('Identificador inválido');
 
+export const orderStatusSchema = z.enum([
+  'PENDING_PAYMENT',
+  'PAID',
+  'PROCESSING',
+  'SHIPPED',
+  'DELIVERED',
+  'CANCELLED',
+  'EXPIRED',
+]);
+
+export const listAdminOrdersSchema = z.object({
+  q: z
+    .string()
+    .trim()
+    .max(100)
+    .optional()
+    .transform((v) => v || undefined),
+  status: orderStatusSchema.optional(),
+  page: z.coerce.number().int().min(1).max(1000).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+export const updateOrderStatusSchema = z.strictObject({
+  status: orderStatusSchema,
+  note: z
+    .string()
+    .trim()
+    .max(500)
+    .nullable()
+    .optional()
+    .transform((v) => v || null),
+});
+
 export const productStatusSchema = z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']);
 
 export const idParamsSchema = z.object({ id: uuid });

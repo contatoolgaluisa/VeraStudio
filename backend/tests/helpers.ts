@@ -40,6 +40,8 @@ export function buildTestApp(overrides: Partial<AppDependencies> = {}) {
     checkDatabase: async () => {},
     verifyToken: testTokenVerifier,
     imageStorage: fakeStorage.storage,
+    // Os testes criam muitos pedidos seguidos; o limite tem um teste próprio.
+    orderCreateLimitPerMinute: 1000,
     ...overrides,
   });
 }
@@ -49,6 +51,11 @@ export async function resetCatalog() {
   await testPrisma.$executeRawUnsafe(
     'TRUNCATE TABLE "product_variants", "product_images", "products", "categories" CASCADE',
   );
+}
+
+/** Apaga todos os pedidos (itens e histórico vão junto). */
+export async function resetOrders() {
+  await testPrisma.$executeRawUnsafe('TRUNCATE TABLE "orders" CASCADE');
 }
 
 /** Apaga todos os perfis de usuário no banco de testes. */

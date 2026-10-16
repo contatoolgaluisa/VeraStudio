@@ -13,6 +13,7 @@ import { cartRouter } from './modules/cart/cart.routes.js';
 import type { TokenVerifier } from './modules/auth/token-verifier.js';
 import { catalogRouter } from './modules/catalog/catalog.routes.js';
 import { healthRouter } from './modules/health/health.routes.js';
+import { ordersRouter } from './modules/orders/orders.routes.js';
 import { createUsersRepository } from './modules/users/users.repository.js';
 import { meRouter } from './modules/users/users.routes.js';
 
@@ -29,6 +30,8 @@ export interface AppDependencies {
   verifyToken: TokenVerifier;
   /** Fotos de produtos (Supabase Storage, ou "não configurado"). */
   imageStorage: ImageStorage;
+  /** Pedidos que cada cliente pode criar por minuto (padrão 10). */
+  orderCreateLimitPerMinute?: number;
 }
 
 export function createApp({
@@ -38,6 +41,7 @@ export function createApp({
   checkDatabase,
   verifyToken,
   imageStorage,
+  orderCreateLimitPerMinute = 10,
 }: AppDependencies): Express {
   const app = express();
 
@@ -67,6 +71,15 @@ export function createApp({
   const users = createUsersRepository(prisma);
   const authenticated = requireAuth(verifyToken, users);
   app.use('/me', meRouter(authenticated, users));
+  app.use(
+    '/orders',
+    ordersRouter({
+      prisma,
+      requireAuth: authenticated,
+      shipping: config.shipping,
+      createLimitPerMinute: orderCreateLimitPerMinute,
+    }),
+  );
   app.use('/admin', adminRouter({ prisma, requireAuth: authenticated, storage: imageStorage }));
 
   app.use(notFoundHandler);

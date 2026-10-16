@@ -64,6 +64,16 @@ export function AccountPage() {
         </div>
       )}
 
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border border-line p-5">
+        <p className="text-sm">Acompanhe seus pedidos e reservas.</p>
+        <Link
+          to="/conta/pedidos"
+          className="text-sm underline underline-offset-4 hover:text-accent"
+        >
+          Meus pedidos
+        </Link>
+      </div>
+
       {data.role === 'ADMIN' && (
         <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border border-line p-5">
           <p className="text-sm">Você tem acesso de administração.</p>

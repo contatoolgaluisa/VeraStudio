@@ -30,6 +30,10 @@ export function CartPage() {
 
   const lines = new Map(quote.data?.items.map((line) => [line.variantId, line]));
   const unavailable = quote.data?.items.filter((line) => line.status === 'UNAVAILABLE') ?? [];
+  const canCheckout =
+    Boolean(quote.data) &&
+    !quote.isFetching &&
+    quote.data!.items.every((line) => line.status === 'OK');
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-10">
@@ -86,12 +90,17 @@ export function CartPage() {
                 Remova os itens indisponíveis para continuar.
               </p>
             )}
-            {/* O fechamento do pedido chega na Fase 6B: o botão diz isso em vez de fingir. */}
-            <Button className="mt-6 w-full" disabled aria-describedby="aviso-checkout">
-              Finalizar compra
-            </Button>
-            <p id="aviso-checkout" className="mt-2 text-xs text-muted">
-              O fechamento do pedido chega na próxima entrega do projeto (Fase 6B).
+            {canCheckout ? (
+              <ButtonLink to="/checkout" className="mt-6 w-full">
+                Finalizar compra
+              </ButtonLink>
+            ) : (
+              <Button className="mt-6 w-full" disabled>
+                Finalizar compra
+              </Button>
+            )}
+            <p className="mt-2 text-xs text-muted">
+              É preciso entrar na sua conta para finalizar a compra.
             </p>
           </div>
           <Link
