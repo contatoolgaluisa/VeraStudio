@@ -43,7 +43,9 @@ describe('GET /me: verificação do login', () => {
       async () => `Bearer ${await signToken(ana, { key: await foreignPrivateKey() })}`,
     ],
   ])('responde 401 para %s', async (_label, header) => {
-    const res = await request(app).get('/me').set('Authorization', await header());
+    const res = await request(app)
+      .get('/me')
+      .set('Authorization', await header());
 
     expect(res.status).toBe(401);
     expect(res.body.error.code).toBe('UNAUTHENTICATED');
@@ -151,9 +153,14 @@ describe('requireRole', () => {
   // App mínimo só para testar o middleware de papel isoladamente.
   const users = createUsersRepository(testPrisma);
   const adminOnly = express()
-    .get('/restrito', requireAuth(testTokenVerifier, users), requireRole(Role.ADMIN), (_req, res) => {
-      res.json({ ok: true });
-    })
+    .get(
+      '/restrito',
+      requireAuth(testTokenVerifier, users),
+      requireRole(Role.ADMIN),
+      (_req, res) => {
+        res.json({ ok: true });
+      },
+    )
     .use(createErrorHandler(createLogger('silent')));
 
   it('bloqueia clientes com 403', async () => {
