@@ -190,13 +190,6 @@ describe('navegação', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
-  it('avisa que o carrinho ainda não foi implementado, em vez de fingir', () => {
-    mockApi(defaultHandlers);
-    renderAt('/carrinho');
-
-    expect(screen.getByText(/será implementado na Fase 6/)).toBeTruthy();
-  });
-
   it('exibe a página 404 para rotas desconhecidas', () => {
     mockApi(defaultHandlers);
     renderAt('/rota-que-nao-existe');

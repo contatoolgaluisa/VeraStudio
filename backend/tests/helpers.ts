@@ -22,6 +22,7 @@ export const testConfig: AppConfig = {
   corsOrigins: ['http://localhost:5173'],
   supabaseUrl: TEST_SUPABASE_URL,
   supabaseSecretKey: null,
+  shipping: { flatCents: 1990, freeMinCents: 29900 },
 };
 
 /** Storage em memória compartilhado pelos testes. */

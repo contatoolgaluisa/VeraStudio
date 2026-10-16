@@ -1,5 +1,6 @@
 import { cleanup, configure } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
+import { cart } from '@/features/cart/store';
 import { resetFakeAuth } from './fake-supabase';
 
 // Quanto tempo os `findBy...` e o `waitFor` esperam a tela mudar. O padrão
@@ -16,4 +17,7 @@ afterEach(() => {
   // Desmonta os componentes renderizados entre um teste e outro.
   cleanup();
   resetFakeAuth();
+  // O carrinho é um estado global salvo no navegador: cada teste começa vazio.
+  cart.clear();
+  localStorage.clear();
 });

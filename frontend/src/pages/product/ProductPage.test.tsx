@@ -1,5 +1,6 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cart } from '@/features/cart/store';
 import { makeProduct, makeProductDetail, mockApi, productList } from '@/test/fixtures';
 import { renderRoute } from '@/test/render';
 
@@ -111,13 +112,42 @@ describe('página do produto', () => {
     expect(await screen.findByText('Foto ilustrativa. A cor escolhida é Preto.')).toBeTruthy();
   });
 
-  it('deixa claro que o carrinho ainda não existe, sem fingir a compra', async () => {
+  it('só adiciona ao carrinho depois de escolher um tamanho disponível', async () => {
     mockApi(handlers);
-    renderRoute('/produto/camiseta-teste');
+    renderRoute('/produto/camiseta-teste?cor=Preto');
 
     const button = await screen.findByRole('button', { name: 'Adicionar ao carrinho' });
     expect(button).toHaveProperty('disabled', true);
-    expect(screen.getByText(/O carrinho de compras chega na Fase 6/)).toBeTruthy();
+    expect(screen.getByText('Escolha um tamanho para adicionar ao carrinho.')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('radio', { name: 'P' }));
+    fireEvent.click(button);
+
+    expect(await screen.findByText('Adicionado ao carrinho.')).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Carrinho, 1 item' })).toBeTruthy();
+    expect(cart.getItems()).toMatchObject([{ variantId: 'T-PRE-P', quantity: 1 }]);
+  });
+
+  it('não passa do estoque somando o que já está no carrinho', async () => {
+    mockApi(handlers);
+    renderRoute('/produto/camiseta-teste?cor=Preto');
+
+    fireEvent.click(await screen.findByRole('radio', { name: 'P' }));
+    const button = screen.getByRole('button', { name: 'Adicionar ao carrinho' });
+    fireEvent.click(button);
+    fireEvent.change(screen.getByLabelText('Quantidade'), { target: { value: '2' } });
+    fireEvent.click(button);
+
+    expect(
+      await screen.findByText('Adicionado até o máximo disponível desta variação.'),
+    ).toBeTruthy();
+    expect(cart.getItems()[0]?.quantity).toBe(2);
+
+    fireEvent.click(button);
+    expect(
+      await screen.findByText('Você já tem no carrinho o máximo disponível desta variação.'),
+    ).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Carrinho, 2 itens' })).toBeTruthy();
   });
 
   it('sugere outros produtos da categoria, sem repetir o atual', async () => {

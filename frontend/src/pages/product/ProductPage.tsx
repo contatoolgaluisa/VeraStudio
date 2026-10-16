@@ -6,6 +6,7 @@ import { ProductImage } from '@/components/product/ProductImage';
 import { Button } from '@/components/ui/Button';
 import { SlowStartNotice } from '@/components/ui/SlowStartNotice';
 import { StatusMessage } from '@/components/ui/StatusMessage';
+import { type AddResult, cart } from '@/features/cart/store';
 import { useProduct, useProducts } from '@/features/catalog/queries';
 import type { ProductDetail } from '@/features/catalog/types';
 import {
@@ -56,6 +57,7 @@ function ProductView({ product }: { product: ProductDetail }) {
   const color = initialColor(product, searchParams.get('cor'));
   const [size, setSize] = useState(initialSize(product));
   const [quantity, setQuantity] = useState(1);
+  const [added, setAdded] = useState<AddResult | null>(null);
   const quantityId = useId();
 
   const variant = findVariant(product, color, size);
@@ -67,11 +69,36 @@ function ProductView({ product }: { product: ProductDetail }) {
     setSearchParams({ cor: name }, { replace: true });
     if (size && sizeStatus(product, name, size) !== 'available' && !singleSize) setSize(undefined);
     setQuantity(1);
+    setAdded(null);
   }
 
   function chooseSize(value: string) {
     setSize(value);
     setQuantity(1);
+    setAdded(null);
+  }
+
+  function addToCart() {
+    if (!variant?.available || !color) return;
+    // A foto e o preço guardados servem só para exibir; o carrinho confere tudo na API.
+    const photo = imagesForColor(product, color).images[0];
+    setAdded(
+      cart.add(
+        {
+          variantId: variant.id,
+          display: {
+            productSlug: product.slug,
+            productName: product.name,
+            color: variant.color,
+            size: variant.size,
+            imageUrl: photo?.url || null,
+            unitPriceCents: product.priceCents,
+          },
+        },
+        quantity,
+        variant.maxQuantity,
+      ),
+    );
   }
 
   const { images, matchesColor } = imagesForColor(product, color);
@@ -237,15 +264,28 @@ function ProductView({ product }: { product: ProductDetail }) {
                 ))}
               </select>
             </div>
-            {/* O carrinho chega na Fase 6. O botão existe para mostrar a regra de
-                seleção, mas fica desativado e diz claramente por quê. */}
-            <Button className="flex-1" disabled aria-describedby="aviso-carrinho">
+            <Button
+              className="flex-1"
+              disabled={!variant?.available}
+              aria-describedby="aviso-carrinho"
+              onClick={addToCart}
+            >
               Adicionar ao carrinho
             </Button>
           </div>
           <p id="aviso-carrinho" className="mt-2 text-sm text-muted">
             {selectionHint(variant, size)}
           </p>
+          <div role="status" className="mt-2 text-sm">
+            {added && (
+              <p className={added === 'full' ? 'text-danger' : undefined}>
+                {ADD_MESSAGES[added]}{' '}
+                <Link to="/carrinho" className="underline underline-offset-4 hover:text-accent">
+                  Ver carrinho
+                </Link>
+              </p>
+            )}
+          </div>
 
           {variant && variant.available && variant.maxQuantity <= 3 && (
             <p className="mt-4 text-sm text-accent">
@@ -290,10 +330,16 @@ const SIZE_STATUS_LABEL: Record<SizeStatus, string> = {
 };
 
 function selectionHint(variant: ReturnType<typeof findVariant>, size: string | undefined) {
-  if (!size) return 'Escolha um tamanho. O carrinho de compras chega na Fase 6 do projeto.';
+  if (!size) return 'Escolha um tamanho para adicionar ao carrinho.';
   if (!variant?.available) return 'Esta combinação está esgotada. Escolha outra cor ou tamanho.';
-  return 'Combinação disponível. O carrinho de compras chega na Fase 6 do projeto.';
+  return 'Combinação disponível.';
 }
+
+const ADD_MESSAGES: Record<AddResult, string> = {
+  added: 'Adicionado ao carrinho.',
+  limited: 'Adicionado até o máximo disponível desta variação.',
+  full: 'Você já tem no carrinho o máximo disponível desta variação.',
+};
 
 function RelatedProducts({ product }: { product: ProductDetail }) {
   const related = useProducts({ category: product.category.slug, pageSize: 5 });

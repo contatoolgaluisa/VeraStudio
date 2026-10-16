@@ -47,8 +47,9 @@ export function ShippingPage() {
       <section>
         <h2>Valores</h2>
         <p>
-          O frete é calculado por uma regra simples e configurável, definida na fase de carrinho e
-          pedidos do projeto. O valor aparece no carrinho antes da finalização da compra.
+          Na configuração padrão do projeto, o frete é fixo em R$ 19,90 para todo o Brasil e
+          gratuito em compras a partir de R$ 299,00, já com os descontos. O valor exato aparece no
+          carrinho antes da finalização da compra.
         </p>
       </section>
       <section>

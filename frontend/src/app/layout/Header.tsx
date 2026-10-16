@@ -5,7 +5,9 @@ import { Icon } from '@/components/ui/Icon';
 import { brand } from '@/config/brand';
 import { mainNavigation } from '@/config/navigation';
 import { useAuth } from '@/features/auth/auth-context';
+import { useCartCount } from '@/features/cart/store';
 import { cn } from '@/lib/cn';
+import { pluralize } from '@/lib/format';
 import { SearchForm } from './SearchForm';
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -17,6 +19,7 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { session } = useAuth();
+  const cartCount = useCartCount();
   const closeMenu = () => setMenuOpen(false);
 
   return (
@@ -58,10 +61,19 @@ export function Header() {
             <Icon name="user" />
             <span className="sr-only">{session ? 'Minha conta' : 'Entrar'}</span>
           </Link>
-          {/* O carrinho é implementado na Fase 6; o link leva a uma página que avisa isso. */}
-          <Link to="/carrinho" className="-mr-2 p-2">
+          <Link to="/carrinho" className="relative -mr-2 p-2">
             <Icon name="bag" />
-            <span className="sr-only">Carrinho</span>
+            <span className="sr-only">
+              Carrinho{cartCount > 0 && `, ${pluralize(cartCount, 'item', 'itens')}`}
+            </span>
+            {cartCount > 0 && (
+              <span
+                aria-hidden="true"
+                className="absolute top-0 right-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-ink px-1 text-[10px] leading-none text-paper tabular-nums"
+              >
+                {cartCount > 99 ? '99+' : cartCount}
+              </span>
+            )}
           </Link>
         </div>
       </div>

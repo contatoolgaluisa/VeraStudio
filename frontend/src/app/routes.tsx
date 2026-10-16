@@ -10,12 +10,12 @@ import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage';
 import { SignUpPage } from '@/pages/auth/SignUpPage';
+import { CartPage } from '@/pages/cart/CartPage';
 import { CatalogPage } from '@/pages/catalog/CatalogPage';
 import { CreditsPage } from '@/pages/credits/CreditsPage';
 import { ContactPage, PrivacyPage, ReturnsPage, ShippingPage } from '@/pages/info/pages';
 import { HomePage } from '@/pages/home/HomePage';
 import { NotFoundPage } from '@/pages/not-found/NotFoundPage';
-import { UpcomingPage } from '@/pages/placeholder/UpcomingPage';
 import { ProductPage } from '@/pages/product/ProductPage';
 import { RootLayout } from './RootLayout';
 
@@ -32,15 +32,7 @@ export const routes: RouteObject[] = [
       { path: 'promocoes', element: <CatalogPage key="sale" variant="sale" /> },
       { path: 'busca', element: <CatalogPage key="search" variant="search" /> },
       { path: 'produto/:slug', element: <ProductPage /> },
-      {
-        path: 'carrinho',
-        element: (
-          <UpcomingPage
-            title="Carrinho"
-            description="O carrinho de compras será implementado na Fase 6 do projeto. Por enquanto, você pode navegar pelo catálogo."
-          />
-        ),
-      },
+      { path: 'carrinho', element: <CartPage /> },
       { path: 'entrar', element: <LoginPage /> },
       { path: 'cadastro', element: <SignUpPage /> },
       { path: 'recuperar-senha', element: <ForgotPasswordPage /> },
