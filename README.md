@@ -3,8 +3,8 @@
 E-commerce de moda full-stack construído como **projeto de portfólio**. A loja, os produtos e os
 dados comerciais são fictícios, e nenhum pagamento real é processado (o Stripe roda em modo de teste).
 
-> **Status:** Fase 2 de 8 (fundação). Estrutura, ferramentas e conexão com o banco estão prontas;
-> catálogo, autenticação, carrinho e pagamentos chegam nas próximas fases.
+> **Status:** Fase 3 de 8 (banco e produtos). A API do catálogo está funcionando com dados
+> demonstrativos; as telas da loja, a autenticação, o carrinho e os pagamentos chegam nas próximas fases.
 > Veja o [plano completo](docs/architecture.md#plano-de-fases).
 
 ## Tecnologias
@@ -64,11 +64,16 @@ cp frontend/.env.example frontend/.env
 # 3. Subir o PostgreSQL local
 npm run db:up
 
-# 4. Iniciar API (porta 3333) e frontend (porta 5173) juntos
+# 4. Criar as tabelas e carregar os produtos de demonstração
+npm run db:migrate -w backend
+npm run db:seed -w backend
+
+# 5. Iniciar API (porta 3333) e frontend (porta 5173) juntos
 npm run dev
 ```
 
-Abra http://localhost:5173. A página inicial mostra o status real da conexão com a API e o banco.
+Abra http://localhost:5173 (status da API e do banco) ou teste a API direto, por exemplo
+http://localhost:3333/catalog/products?category=feminino.
 
 > No Windows (PowerShell), troque `cp` por `Copy-Item`.
 
@@ -88,6 +93,19 @@ Execute na raiz do projeto:
 | `npm run db:up`        | Sobe o PostgreSQL no Docker                                      |
 | `npm run db:down`      | Para o PostgreSQL (os dados continuam salvos no volume)          |
 
+Comandos do banco, executados com `-w backend` (ex.: `npm run db:seed -w backend`):
+
+| Comando              | O que faz                                                            |
+| -------------------- | -------------------------------------------------------------------- |
+| `db:migrate`         | Aplica migrations pendentes no banco de desenvolvimento e cria novas  |
+| `db:seed`            | Recria o catálogo demonstrativo (apaga só as tabelas do catálogo)     |
+| `db:reset`           | Apaga o banco de desenvolvimento inteiro e reaplica as migrations     |
+| `db:deploy`          | Aplica migrations sem criar novas (usado em produção)                 |
+| `db:studio`          | Abre o Prisma Studio para navegar pelos dados no navegador            |
+
+> `npm run test` e `npm run check` precisam do PostgreSQL rodando (`npm run db:up`): os testes de
+> integração usam um banco separado, `vera_studio_test`, e apagam os dados dele a cada execução.
+
 ## Variáveis de ambiente
 
 **Backend** (`backend/.env`): veja [backend/.env.example](backend/.env.example).
@@ -96,6 +114,7 @@ Execute na raiz do projeto:
 | -------------- | ---------------------------------------------------------------- |
 | `DATABASE_URL` | Conexão da aplicação com o banco (no Supabase: pooler, porta 6543) |
 | `DIRECT_URL`   | Conexão usada pelas migrations (no Supabase: porta 5432)          |
+| `TEST_DATABASE_URL` | Banco exclusivo dos testes automatizados (os dados são apagados) |
 | `CORS_ORIGINS` | Origens autorizadas a chamar a API, separadas por vírgula         |
 | `PORT`         | Porta da API (padrão 3333)                                        |
 | `LOG_LEVEL`    | Nível de log (padrão `info`)                                      |
@@ -108,10 +127,16 @@ O servidor valida as variáveis ao iniciar e, se algo estiver errado, mostra qua
 
 ## Endpoints disponíveis
 
-| Método | Rota            | Descrição                                             |
-| ------ | --------------- | ----------------------------------------------------- |
-| GET    | `/health`       | O processo está no ar (usado pelo Render)             |
-| GET    | `/health/ready` | A API consegue acessar o banco (200 ou 503)           |
+| Método | Rota                          | Descrição                                               |
+| ------ | ----------------------------- | ------------------------------------------------------- |
+| GET    | `/health`                     | O processo está no ar (usado pelo Render)               |
+| GET    | `/health/ready`               | A API consegue acessar o banco (200 ou 503)             |
+| GET    | `/catalog/categories`         | Categorias com a contagem de produtos publicados        |
+| GET    | `/catalog/products`           | Busca, filtros, ordenação e paginação                   |
+| GET    | `/catalog/products/:slug`     | Detalhes de um produto publicado                        |
+| GET    | `/catalog/filters`            | Cores, tamanhos e faixa de preço disponíveis            |
+
+Parâmetros, formatos de resposta e regras: [docs/api.md](docs/api.md).
 
 ## Diagnóstico de problemas comuns
 
@@ -119,6 +144,11 @@ O servidor valida as variáveis ao iniciar e, se algo estiver errado, mostra qua
   ou tem algum valor errado. Copie o `.env.example` e confira a variável indicada.
 - **Frontend mostra "Sem conexão"**: confira se o backend está rodando e se `VITE_API_URL`
   aponta para ele. Se o backend rodar e o banco não, `/health/ready` responde 503.
+- **`TEST_DATABASE_URL não definida`** ao rodar os testes: adicione a variável ao `backend/.env`
+  (veja o `.env.example`).
+- **`database "vera_studio_test" does not exist`**: o volume do Docker foi criado antes do script
+  que cria o banco de testes. Rode `npm run db:down`, depois
+  `docker volume rm verastudio_vera-db-data` (apaga os dados locais) e `npm run db:up`.
 - **Porta 5432 ocupada**: há outro PostgreSQL rodando na máquina. Pare-o ou mude a porta no
   `docker-compose.yml` e nas URLs do `.env`.
 
@@ -127,11 +157,13 @@ O servidor valida as variáveis ao iniciar e, se algo estiver errado, mostra qua
 Documentada na Fase 8. Variáveis, URLs públicas, CORS, migrations e webhooks serão descritos em
 `docs/deploy.md`.
 
-## Limitações conhecidas (Fase 2)
+## Limitações conhecidas (Fase 3)
 
-- Ainda não há catálogo, autenticação, carrinho ou pagamentos.
-- A conexão com o banco usa o driver `pg` diretamente para o health check; o Prisma Client passa a
-  ser usado na Fase 3, quando o schema ganhar os modelos.
+- As telas da loja ainda não existem: o catálogo está disponível apenas pela API.
+- Os produtos ainda não têm fotos (entram na fase de interface).
+- Ainda não há autenticação, carrinho, pedidos ou pagamentos.
+- A busca usa `ILIKE` (contém o texto, sem diferenciar maiúsculas). Ela diferencia acentos:
+  "cafe" não encontra "café".
 
 ## Sobre este projeto
 

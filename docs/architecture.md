@@ -58,16 +58,20 @@ Toda resposta de erro segue o mesmo formato:
 Erros esperados usam `AppError` (código HTTP e código de erro definidos). Qualquer outro erro vira
 `500 INTERNAL_ERROR` com mensagem genérica; os detalhes vão só para o log.
 
-## Modelo de dados (implementado na Fase 3)
+## Modelo de dados
 
 Valores monetários em **centavos (inteiro)**, o formato usado pelo Stripe.
 
+**Implementado (Fase 3):** `Category`, `Product`, `ProductImage`, `ProductVariant`.
+**Planejado:** `UserProfile` (Fase 5), `Order`, `OrderItem` e `OrderStatusHistory` (Fase 6),
+`Payment` e `WebhookEvent` (Fase 7). Cada grupo entra com a sua migration, junto do código que o usa.
+
 ```
 UserProfile    id (= id do Supabase Auth) · email · name · role (CUSTOMER|ADMIN) · timestamps
-Category       id · name · slug (único) · parentId? · sortOrder · timestamps
+Category       id · name · slug (único) · description? · sortOrder · timestamps
 Product        id · name · slug (único) · description · categoryId → Category
                priceCents · compareAtPriceCents? · status (DRAFT|PUBLISHED|ARCHIVED) · isNew
-ProductImage   id · productId → Product · storagePath · alt · color? · position
+ProductImage   id · productId → Product · url · storagePath? · alt · color? · position
 ProductVariant id · productId → Product · sku (único) · color · colorHex · size
                stock (CHECK >= 0) · isActive         único: (productId, color, size)
 Order          id · number · userId → UserProfile · status · fulfillmentStatus
@@ -90,8 +94,8 @@ OrderStatusHistory  id · orderId · from · to · changedBy · note · createdA
 | Fase | Conteúdo                                                                                 | Status       |
 | ---- | ---------------------------------------------------------------------------------------- | ------------ |
 | 1    | Planejamento e arquitetura                                                               | Concluída    |
-| 2    | Fundação: monorepo, TypeScript, lint, env validado, Postgres local, health check, CI     | Em revisão   |
-| 3    | Banco e produtos: schema, migrations, seed, API pública do catálogo                      | Pendente     |
+| 2    | Fundação: monorepo, TypeScript, lint, env validado, Postgres local, health check, CI     | Concluída    |
+| 3    | Banco e produtos: schema, migrations, seed, API pública do catálogo                      | Em revisão   |
 | 4    | Interface e catálogo: identidade visual, páginas públicas, responsividade, acessibilidade | Pendente     |
 | 5    | Autenticação e administração                                                             | Pendente     |
 | 6    | Carrinho e pedidos (reserva de estoque)                                                  | Pendente     |

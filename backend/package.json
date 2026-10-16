@@ -7,13 +7,24 @@
     "node": ">=22.22.2"
   },
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "predev": "prisma generate",
+    "dev": "node --watch-path=src --import tsx src/server.ts",
+    "prebuild": "prisma generate",
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
+    "pretypecheck": "prisma generate",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pretest": "prisma generate",
     "test": "vitest run",
     "test:watch": "vitest",
     "prisma": "prisma",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "predb:seed": "prisma generate",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:reset": "prisma migrate reset",
+    "db:studio": "prisma studio",
     "db:validate": "prisma validate"
   },
   "dependencies": {

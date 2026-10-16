@@ -10,27 +10,79 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+
+    # PostgreSQL temporário, criado só para esta execução do CI.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: vera
+          POSTGRES_PASSWORD: vera_ci
+          POSTGRES_DB: vera_studio
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U vera -d vera_studio"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
     env:
-      # Valores fictícios só para o CI: os testes da Fase 2 não acessam o banco.
-      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
-      DIRECT_URL: postgresql://ci:ci@localhost:5432/ci
+      DATABASE_URL: postgresql://vera:vera_ci@localhost:5432/vera_studio
+      DIRECT_URL: postgresql://vera:vera_ci@localhost:5432/vera_studio
+      TEST_DATABASE_URL: postgresql://vera:vera_ci@localhost:5432/vera_studio_test
       CORS_ORIGINS: http://localhost:5173
       VITE_API_URL: http://localhost:3333
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
           cache: npm
 
-      # Usa `npm ci` (reprodutível) quando o package-lock.json existir.
       - name: Instalar dependências
-        run: |
-          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+        run: npm ci
 
-      - run: npm run format:check
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm run test
-      - run: npm run build
+      - name: Criar banco de testes
+        run: psql "postgresql://vera:vera_ci@localhost:5432/vera_studio" -c "CREATE DATABASE vera_studio_test;"
+
+      # Cada verificação roda mesmo se a anterior falhar (`if: !cancelled()`),
+      # para que um único CI mostre todos os problemas de uma vez.
+      # O job continua falhando se qualquer etapa falhar.
+      - name: Lint
+        if: ${{ !cancelled() }}
+        run: npm run lint
+
+      - name: Tipos (TypeScript)
+        if: ${{ !cancelled() }}
+        run: npm run typecheck
+
+      - name: Testes
+        if: ${{ !cancelled() }}
+        run: npm run test
+
+      - name: Build
+        if: ${{ !cancelled() }}
+        run: npm run build
+
+      # Garante que as migrations e o seed funcionam do zero, como no deploy.
+      - name: Migrations e seed
+        if: ${{ !cancelled() }}
+        working-directory: backend
+        run: |
+          npm run db:deploy
+          npm run db:seed
+
+      # Se a formatação falhar, anota cada arquivo no PR com o que o Prettier mudaria.
+      - name: Formatação
+        if: ${{ !cancelled() }}
+        run: |
+          if npm run format:check; then exit 0; fi
+          npx prettier --write . > /dev/null
+          for file in $(git diff --name-only); do
+            diff=$(git --no-pager diff --unified=1 -- "$file" | tail -n +5 | sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g')
+            echo "::error file=$file,title=Formatação (rode npm run format)::$diff"
+          done
+          exit 1
